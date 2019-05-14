@@ -67,7 +67,8 @@ class _ArgValueTypeDefiner:
         pattern = re.compile(r'^\d+.\d+.\d+.\d+/\d{1,2}$')
         return self._is_str_match(pattern, val)
 
-    def define_data_type(self):
+    @property
+    def data_types(self):
         hosts_type = self._define_data(self._hosts_type_definers, self._hosts)
         ports_type = None
 
@@ -81,4 +82,3 @@ class _ArgValueTypeDefiner:
 class DataPreparator(_ArgValueTypeDefiner):
     def __init__(self, hosts, ports=None):
         super().__init__(hosts, ports)
-        self._data_types = self.define_data_type()
