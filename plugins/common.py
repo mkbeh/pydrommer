@@ -6,35 +6,35 @@ from dataclasses import dataclass, field
 
 
 @dataclass(repr=False, eq=False)
-class ArgValueTypeDefiner:
-    hosts: str
-    ports: str = None
+class _ArgValueTypeDefiner:
+    _hosts: str
+    _ports: str = None
 
-    hosts_type_definers: dict = field(init=False)
-    ports_type_definers: dict = field(init=False)
+    _hosts_type_definers: dict = field(init=False)
+    _ports_type_definers: dict = field(init=False)
 
     def __post_init__(self):
-        self.hosts_type_definers = {
-            'file': self.is_file,
-            'single': self.is_single,
-            'subnet': self.is_subnet
+        self._hosts_type_definers = {
+            'file': self._is_file,
+            'single': self._is_single,
+            'subnet': self._is_subnet
         }
-        self.ports_type_definers = {
-            'file': self.is_file,
-            'single': self.is_single,
-            'range': self.is_range,
-            'separated': self.is_separated,
-            'combined': self.is_combined
+        self._ports_type_definers = {
+            'file': self._is_file,
+            'single': self._is_single,
+            'range': self._is_range,
+            'separated': self._is_separated,
+            'combined': self._is_combined
         }
 
     @staticmethod
-    def define_data(seq, data):
+    def _define_data(seq, data):
         for arg_type, func in seq.items():
             if func(data):
                 return {'type': arg_type, 'data': data}
 
     @staticmethod
-    def is_str_match(pattern, s):
+    def _is_str_match(pattern, s):
         try:
             re.match(pattern, s).group()
         except AttributeError:
@@ -43,42 +43,42 @@ class ArgValueTypeDefiner:
             return True
 
     @staticmethod
-    def is_file(val):
+    def _is_file(val):
         return os.path.isfile(val)
 
-    def is_range(self, val):
+    def _is_range(self, val):
         pattern = re.compile(r'^\d+-\d+$')
-        return self.is_str_match(pattern, val)
+        return self._is_str_match(pattern, val)
 
-    def is_separated(self, val):
+    def _is_separated(self, val):
         pattern = re.compile(r'^\d+,(\d+,?)+$')
-        return self.is_str_match(pattern, val)
+        return self._is_str_match(pattern, val)
 
-    def is_combined(self, val):
+    def _is_combined(self, val):
         pattern = re.compile(r'^\d+|(d+-\d+),(\d+|(d+-\d+),?)+')
-        return self.is_str_match(pattern, val)
+        return self._is_str_match(pattern, val)
 
-    def is_single(self, val):
+    def _is_single(self, val):
         host_pattern = re.compile(r'^\d+.\d+.\d+.\d+$')
         port_pattern = re.compile(r'^\d+$')
-        return self.is_str_match(host_pattern, val) or self.is_str_match(port_pattern, val)
+        return self._is_str_match(host_pattern, val) or self._is_str_match(port_pattern, val)
 
-    def is_subnet(self, val):
+    def _is_subnet(self, val):
         pattern = re.compile(r'^\d+.\d+.\d+.\d+/\d{1,2}$')
-        return self.is_str_match(pattern, val)
+        return self._is_str_match(pattern, val)
 
     def define_data_type(self):
-        hosts_type = self.define_data(self.hosts_type_definers, self.hosts)
+        hosts_type = self._define_data(self._hosts_type_definers, self._hosts)
         ports_type = None
 
-        if self.ports:
-            ports_type = self.define_data(self.ports_type_definers, self.ports)
+        if self._ports:
+            ports_type = self._define_data(self._ports_type_definers, self._ports)
 
         return hosts_type, ports_type
 
 
 @dataclass(repr=False, eq=False, init=False)
-class DataPreparator(ArgValueTypeDefiner):
+class DataPreparator(_ArgValueTypeDefiner):
     def __init__(self, hosts, ports=None):
         super().__init__(hosts, ports)
-        self.data_types = self.define_data_type()
+        self._data_types = self.define_data_type()
