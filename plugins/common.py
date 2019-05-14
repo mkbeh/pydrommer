@@ -2,14 +2,18 @@
 import os
 import re
 
+from dataclasses import dataclass, field
 
+
+@dataclass(repr=False, eq=False)
 class ArgValueTypeDefiner:
-    flag = None
+    hosts: str
+    ports: str = None
 
-    def __init__(self, hosts, ports=None):
-        self.hosts = hosts
-        self.ports = ports
+    hosts_type_definers: dict = field(init=False)
+    ports_type_definers: dict = field(init=False)
 
+    def __post_init__(self):
         self.hosts_type_definers = {
             'file': self.is_file,
             'single': self.is_single,
@@ -71,3 +75,10 @@ class ArgValueTypeDefiner:
             ports_type = self.define_data(self.ports_type_definers, self.ports)
 
         return hosts_type, ports_type
+
+
+@dataclass(repr=False, eq=False, init=False)
+class DataPreparator(ArgValueTypeDefiner):
+    def __init__(self, hosts, ports=None):
+        super().__init__(hosts, ports)
+        self.data_types = self.define_data_type()
