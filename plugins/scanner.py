@@ -98,7 +98,7 @@ class PortsChecker:
         return rpcs
 
 
-class PyDrommer:
+class PortsScanner:
     def __init__(self):
         self.checker = PortsChecker()
 
@@ -135,7 +135,7 @@ class PyDrommer:
         # return (addr for addr in rpc_addrs) if genexpr else tuple(rpc_addrs)
 
 
-drommer = PyDrommer()
+drommer = PortsScanner()
 # asyncio.run(check_on_open_port('46.160.199.52', 18332))
 ioloop = asyncio.get_event_loop()
 ioloop.run_until_complete(drommer.ports_scanner('192.168.1.71'))

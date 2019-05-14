@@ -3,14 +3,11 @@ import sys
 
 from plugins.pinger import PingTCP, PingICMP
 
+"""
+ключ х убрать и читать всегда первый параметр из сусаргв , он и будет хостом
+порты слипшиеся с опцией делать
+"""
 
-"""
-keys:
--h hosts
--p ports
--pI icmp ping
--pT tcp ping
-"""
 
 
 CLI_KEYS = [
@@ -21,12 +18,12 @@ CLI_KEYS = [
 CLI_OPTIONS = {
     '-pI': PingICMP,
     '-PT': PingTCP,
+    '-sP': '',
 }
 
 
-def cli_args_handler(options, keys):
-    print(options)
-    print(keys)
+def cli_args_handler(option, keys):
+    action = CLI_OPTIONS.get(option)
 
 
 def cli_args_parser():
@@ -42,7 +39,7 @@ def cli_args_parser():
         elif arg in CLI_OPTIONS.keys():
             options.append(arg)
 
-    cli_args_handler(options, keys)
+    cli_args_handler(*options, keys)
 
 
 def cli():

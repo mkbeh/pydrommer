@@ -3,15 +3,13 @@
 2 вида пинга:
 1) через утилиту ping
 2) через сканирование дефолтных портов
+
 """
 
 
-class Ping:
-    pass
-
-
 class PingICMP:
-    pass
+    def __init__(self):
+        pass
 
 
 class PingTCP:
