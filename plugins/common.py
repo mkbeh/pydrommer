@@ -83,7 +83,7 @@ class _ArgValueTypeDefiner:
 
 @dataclass(repr=False, eq=False, init=False)
 class BlocksCalculator:
-    def __init__(self, *args, hosts_block_size=3, ports_block_size=20):
+    def __init__(self, *args, hosts_block_size=3, ports_block_size=2):
         self.hosts_block_size = hosts_block_size
         self.ports_block_size = ports_block_size
         self.definer = _ArgValueTypeDefiner(*args)
@@ -125,8 +125,9 @@ class BlocksCalculator:
 
         raise exceptions.InvalidPortsRange(val)
 
-    def calc_separated_blocks_num(self, val):
-        pass
+    def calc_separated_blocks_num(self, name, val):
+        els_num = len(val.split(','))
+        return self.calc_blocks(name, els_num)
 
     def calc_combined_blocks_num(self, val):
         pass
@@ -153,7 +154,7 @@ class BlocksCalculator:
         return blocks_num
 
 
-obj = BlocksCalculator('192.0.2.16/29', '20-500').calc_blocks_num()
+obj = BlocksCalculator('192.0.2.16/29', '80,90,100,20,30').calc_blocks_num()
 
 
 @dataclass(repr=False, eq=False, init=False)
