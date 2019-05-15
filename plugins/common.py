@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from netaddr import IPNetwork
 
 from extra import utils
+from extra import exceptions
 
 
 @dataclass(repr=False, eq=False)
@@ -115,8 +116,14 @@ class BlocksCalculator:
         addrs_num = len(IPNetwork(val))
         return self.calc_blocks(name, addrs_num)
 
-    def calc_range_blocks_num(self, val):
-        pass
+    def calc_range_blocks_num(self, name, val):
+        nums, valid_range = utils.range_to_int_nums(val, check_valid=True)
+
+        if valid_range:
+            range_len = utils.sub_nums_in_seq(*nums)
+            return self.calc_blocks(name, range_len)
+
+        raise exceptions.InvalidPortsRange(val)
 
     def calc_separated_blocks_num(self, val):
         pass
@@ -128,6 +135,9 @@ class BlocksCalculator:
         blocks_num = {}
 
         for data in self.definer.data_types:
+            # num_blocks = self.blocks_calculators.get(data['type'])(
+            #     data['name'], data['data']
+            # )
             try:
                 num_blocks = self.blocks_calculators.get(data['type'])(
                     data['name'], data['data']
@@ -143,7 +153,7 @@ class BlocksCalculator:
         return blocks_num
 
 
-obj = BlocksCalculator('192.0.2.16/29', '80').calc_blocks_num()
+obj = BlocksCalculator('192.0.2.16/29', '20-500').calc_blocks_num()
 
 
 @dataclass(repr=False, eq=False, init=False)
