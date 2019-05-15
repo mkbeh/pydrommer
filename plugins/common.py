@@ -27,10 +27,10 @@ class _ArgValueTypeDefiner:
         }
         self._ports_type_definers = {
             'range': self._is_range,
-            'file': self._is_file,
-            'single': self._is_single,
             'separated': self._is_separated,
             'combined': self._is_combined,
+            'file': self._is_file,
+            'single': self._is_single,
         }
 
     @staticmethod
@@ -61,7 +61,7 @@ class _ArgValueTypeDefiner:
         return self._is_str_match(pattern, val)
 
     def _is_combined(self, val):
-        pattern = re.compile(r'^\d+|(d+-\d+),(\d+|(d+-\d+),?)+')
+        pattern = re.compile(r'^\d+|(d+-\d+),(\d+|(d+-\d+),?)+$')
         return self._is_str_match(pattern, val)
 
     def _is_single(self, val):
@@ -84,63 +84,70 @@ class _ArgValueTypeDefiner:
 @dataclass(repr=False, eq=False, init=False)
 class BlocksCalculator:
     def __init__(self, *args, hosts_block_size=3, ports_block_size=2):
-        self.hosts_block_size = hosts_block_size
-        self.ports_block_size = ports_block_size
-        self.definer = _ArgValueTypeDefiner(*args)
+        self._hosts_block_size = hosts_block_size
+        self._ports_block_size = ports_block_size
+        self._definer = _ArgValueTypeDefiner(*args)
 
-        self.blocks_calculators = {
-            'single': self.calc_single_block_num,
-            'file': self.calc_file_blocks_num,
-            'subnet': self.calc_subnet_blocks_num,
+        self._blocks_calculators = {
+            'single': self._calc_single_block_num,
+            'file': self._calc_file_blocks_num,
+            'subnet': self._calc_subnet_blocks_num,
 
-            'range': self.calc_range_blocks_num,
-            'separated': self.calc_separated_blocks_num,
-            'combined': self.calc_combined_blocks_num
+            'range': self._calc_range_blocks_num,
+            'separated': self._calc_separated_blocks_num,
+            'combined': self._calc_combined_blocks_num
         }
 
-    def calc_blocks(self, name, num):
+    def _calc_blocks(self, name, num):
         block_size = self.__dict__.get(name + '_block_size')
         blocks_num = math.ceil(num / block_size)
 
         return 1 if blocks_num == 0 else utils.truncate(blocks_num)
 
     @staticmethod
-    def calc_single_block_num():
+    def _calc_single_block_num():
         pass
 
-    def calc_file_blocks_num(self, name, val):
+    def _calc_file_blocks_num(self, name, val):
         lines_num = utils.count_lines(val)
-        return self.calc_blocks(name, lines_num)
+        return self._calc_blocks(name, lines_num)
 
-    def calc_subnet_blocks_num(self, name, val):
+    def _calc_subnet_blocks_num(self, name, val):
         addrs_num = len(IPNetwork(val))
-        return self.calc_blocks(name, addrs_num)
+        return self._calc_blocks(name, addrs_num)
 
-    def calc_range_blocks_num(self, name, val):
+    def _calc_range_blocks_num(self, name, val):
         nums, valid_range = utils.range_to_int_nums(val, check_valid=True)
 
         if valid_range:
             range_len = utils.sub_nums_in_seq(*nums)
-            return self.calc_blocks(name, range_len)
+            return self._calc_blocks(name, range_len)
 
         raise exceptions.InvalidPortsRange(val)
 
-    def calc_separated_blocks_num(self, name, val):
+    def _calc_separated_blocks_num(self, name, val):
         els_num = len(val.split(','))
-        return self.calc_blocks(name, els_num)
+        return self._calc_blocks(name, els_num)
 
-    def calc_combined_blocks_num(self, val):
-        pass
+    def _calc_combined_blocks_num(self, name, val):
+        vals = val.split(',')
+        blocks_counts = []
 
-    def calc_blocks_num(self):
+        for el in vals:
+            try:
+                blocks_counts.append(self._calc_range_blocks_num(name, el))
+            except TypeError:
+                blocks_counts.append(1)
+
+        return sum(blocks_counts)
+
+    @property
+    def blocks_num(self):
         blocks_num = {}
 
-        for data in self.definer.data_types:
-            # num_blocks = self.blocks_calculators.get(data['type'])(
-            #     data['name'], data['data']
-            # )
+        for data in self._definer.data_types:
             try:
-                num_blocks = self.blocks_calculators.get(data['type'])(
+                num_blocks = self._blocks_calculators.get(data['type'])(
                     data['name'], data['data']
                 )
             except TypeError:
@@ -148,13 +155,7 @@ class BlocksCalculator:
             else:
                 blocks_num.update({data['name']: num_blocks})
 
-        print(self.definer.data_types)
-        print(blocks_num)
-
         return blocks_num
-
-
-obj = BlocksCalculator('192.0.2.16/29', '80,90,100,20,30').calc_blocks_num()
 
 
 @dataclass(repr=False, eq=False, init=False)
