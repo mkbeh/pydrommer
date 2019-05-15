@@ -5,6 +5,8 @@ import math
 
 from dataclasses import dataclass, field
 
+from netaddr import IPNetwork
+
 from extra import utils
 
 
@@ -80,7 +82,7 @@ class _ArgValueTypeDefiner:
 
 @dataclass(repr=False, eq=False, init=False)
 class BlocksCalculator:
-    def __init__(self, *args, hosts_block_size=2, ports_block_size=20):
+    def __init__(self, *args, hosts_block_size=3, ports_block_size=20):
         self.hosts_block_size = hosts_block_size
         self.ports_block_size = ports_block_size
         self.definer = _ArgValueTypeDefiner(*args)
@@ -95,19 +97,23 @@ class BlocksCalculator:
             'combined': self.calc_combined_blocks_num
         }
 
+    def calc_blocks(self, name, num):
+        block_size = self.__dict__.get(name + '_block_size')
+        blocks_num = math.ceil(num / block_size)
+
+        return 1 if blocks_num == 0 else utils.truncate(blocks_num)
+
     @staticmethod
     def calc_single_block_num():
         pass
 
     def calc_file_blocks_num(self, name, val):
         lines_num = utils.count_lines(val)
-        block_size = self.__dict__.get(name + '_block_size')
-        blocks_num = math.ceil(lines_num / block_size)
+        return self.calc_blocks(name, lines_num)
 
-        return 1 if blocks_num == 0 else utils.truncate(blocks_num)
-
-    def calc_subnet_blocks_num(self, val):
-        pass
+    def calc_subnet_blocks_num(self, name, val):
+        addrs_num = len(IPNetwork(val))
+        return self.calc_blocks(name, addrs_num)
 
     def calc_range_blocks_num(self, val):
         pass
@@ -137,7 +143,7 @@ class BlocksCalculator:
         return blocks_num
 
 
-obj = BlocksCalculator('../test_data/hosts.txt', '../test_data/ports.txt').calc_blocks_num()
+obj = BlocksCalculator('192.0.2.16/29', '80').calc_blocks_num()
 
 
 @dataclass(repr=False, eq=False, init=False)
