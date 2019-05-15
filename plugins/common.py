@@ -159,59 +159,51 @@ class BlocksCalculator:
 
 
 @dataclass(repr=False, eq=False, init=False)
-class DataPreparator(_ArgValueTypeDefiner):
+class DataPreparator(BlocksCalculator):
     def __init__(self, hosts, ports=None, hosts_block_size=10, ports_block_size=20):
-        super().__init__(hosts, ports)
-        self.hosts_block_size = hosts_block_size
-        self.ports_block_size = ports_block_size
+        super().__init__(hosts, ports, hosts_block_size, ports_block_size)
         self.data_getters = {
             'single': self.data_single,
             'file': self.data_from_file,
             'subnet': self.data_from_subnet,
 
-            'range': self._is_range,
-            'separated': self._is_separated,
-            'combined': self._is_combined
+            'range': self.data_from_range,
+            'separated': self.data_from_separated,
+            'combined': self.data_from_combined
         }
 
     @property
     def data_single(self):
-        for i in range(10):
-            yield i
+        yield
 
     @property
     def data_from_file(self):
-        pass
+        yield
 
     @property
     def data_from_subnet(self):
-        pass
+        yield
 
     @property
     def data_from_range(self):
-        pass
+        yield
 
     @property
     def data_from_separated(self):
-        pass
+        yield
 
     @property
     def data_from_combined(self):
-        pass
+        yield
 
     @property
     def data_block(self):
-        pass
+        yield
 
     def get_data(self):
-        hosts_data, ports_data = self.data_types
+        hosts_data, ports_data = self._definer.data_types
         hosts_getter = self.data_getters.get(hosts_data['type'])
         ports_getter = self.data_getters.get(ports_data['type'])
-
-        s = hosts_getter
-
-        for i in s:
-            print(i)
 
 
 class Test(DataPreparator):
