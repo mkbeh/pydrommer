@@ -143,7 +143,7 @@ class BlocksCalculator:
 
     @property
     def blocks_num(self):
-        blocks_num = {}
+        num_blocks_data = {}
 
         for data in self._definer.data_types:
             try:
@@ -151,11 +151,11 @@ class BlocksCalculator:
                     data['name'], data['data']
                 )
             except TypeError:
-                blocks_num.update({data['name']: 1})
+                num_blocks_data.update({data['name']: 1})
             else:
-                blocks_num.update({data['name']: num_blocks})
+                num_blocks_data.update({data['name']: num_blocks})
 
-        return blocks_num
+        return num_blocks_data
 
 
 @dataclass(repr=False, eq=False, init=False)
