@@ -2,6 +2,7 @@
 import os
 import re
 import math
+import linecache
 
 from dataclasses import dataclass, field
 
@@ -14,10 +15,11 @@ from extra import exceptions
 @dataclass(repr=False, eq=False)
 class _ArgValueTypeDefiner:
     _hosts: str
-    _ports: str = '1-65535'
+    _ports: str
 
     _hosts_type_definers: dict = field(init=False)
     _ports_type_definers: dict = field(init=False)
+    data_types: dict = field(init=False)
 
     def __post_init__(self):
         self._hosts_type_definers = {
@@ -73,20 +75,23 @@ class _ArgValueTypeDefiner:
         pattern = re.compile(r'^\d+.\d+.\d+.\d+/\d{1,2}$')
         return self._is_str_match(pattern, val)
 
-    @property
-    def data_types(self):
+    def get_data_types(self):
         hosts_type = self._define_data('hosts', self._hosts_type_definers, self._hosts)
         ports_type = self._define_data('ports', self._ports_type_definers, self._ports)
+
+        if not hosts_type:
+            raise exceptions.IncorrectHosts(self._hosts)
 
         return {'hosts': hosts_type, 'ports': ports_type}
 
 
 @dataclass(repr=False, eq=False, init=False)
-class BlocksCalculator:
+class BlocksCalculator(_ArgValueTypeDefiner):
     def __init__(self, *args, hosts_block_size=3, ports_block_size=2):
+        super().__init__(*args)
         self._hosts_block_size = hosts_block_size
         self._ports_block_size = ports_block_size
-        self._definer = _ArgValueTypeDefiner(*args)
+        self.data_types = self.get_data_types()
 
         self._blocks_calculators = {
             'single': self._calc_single_block_num,
@@ -141,11 +146,10 @@ class BlocksCalculator:
 
         return sum(blocks_counts)
 
-    @property
-    def num_blocks(self):
+    def get_num_blocks(self):
         num_blocks_data = {}
 
-        for data in self._definer.data_types.values():
+        for data in self.data_types.values():
             try:
                 num_blocks = self._blocks_calculators.get(data['type'])(
                     data['name'], data['data']
@@ -160,12 +164,13 @@ class BlocksCalculator:
 
 @dataclass(repr=False, eq=False, init=False)
 class DataPreparator(BlocksCalculator):
-    def __init__(self, *args, hosts_block_size=10, ports_block_size=20):
-        super().__init__(*args, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
-        self.hosts_data, self.ports_data = self._definer.data_types
+    def __init__(self, hosts, ports='1-65535', hosts_block_size=10, ports_block_size=20):
+        super().__init__(hosts, ports, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
+        self.hosts_data, self.ports_data = self.data_types
+        self.num_blocks = self.get_num_blocks()
         self.data_getters = {
             'single': self.get_single_data,
-            'file': self.data_from_file,
+            'file': self.get_data_from_file,
             'subnet': self.data_from_subnet,
 
             'range': self.data_from_range,
@@ -173,13 +178,25 @@ class DataPreparator(BlocksCalculator):
             'combined': self.data_from_combined
         }
 
-    @staticmethod
-    def get_single_data(data, block_num):
-        seq = (data,)
-        return seq if block_num else seq
+    def calc_block_range(self, name, block_num):
+        block_size = self.__dict__.get(f'_{name}_block_size')
+        end = block_num * block_size
+        start = end - block_size
 
-    def data_from_file(self):
-        yield
+        return start, end
+
+    @staticmethod
+    def get_single_data(name, data, block_num):
+        seq = (data,)
+        return seq if block_num and name else seq
+
+    def get_data_from_file(self, name, file, block_num):
+        start, end = self.calc_block_range(name, block_num)
+        lines = (utils.clear_string(linecache.getline(file, line_num))
+                 for line_num in range(start, end))
+
+        linecache.clearcache()
+        return filter(lambda x: x != '', lines)
 
     def data_from_subnet(self):
         yield
@@ -194,8 +211,9 @@ class DataPreparator(BlocksCalculator):
         yield
 
     def get_data_block(self, block_num, data_belong_to=None):
-        data = self._definer.data_types.get(data_belong_to)
+        data = self.data_types.get(data_belong_to)
+        new_block_num = 1 if block_num == 0 else block_num
 
         return self.data_getters.get(
            data.get('type')
-        )(data.get('data'), block_num)
+        )(data.get('name'), data.get('data'), new_block_num)

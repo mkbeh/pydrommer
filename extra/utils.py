@@ -33,3 +33,6 @@ def range_to_int_nums(rng, check_valid=False):
 def sub_nums_in_seq(first, second):
     return operator.sub(second, first)
 
+
+def clear_string(s):
+    return s.strip(' \n')
