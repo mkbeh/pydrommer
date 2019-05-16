@@ -171,7 +171,7 @@ class DataPreparator(BlocksCalculator):
         self.data_getters = {
             'single': self.get_single_data,
             'file': self.get_data_from_file,
-            'subnet': self.data_from_subnet,
+            'subnet': self.get_data_from_subnet,
 
             'range': self.data_from_range,
             'separated': self.data_from_separated,
@@ -198,7 +198,7 @@ class DataPreparator(BlocksCalculator):
         linecache.clearcache()
         return filter(lambda x: x != '', lines)
 
-    def data_from_subnet(self, name, data, block_num):
+    def get_data_from_subnet(self, name, data, block_num):
         start, end = self.calc_block_range(name, block_num)
         data_slice = IPNetwork(data)[start:end]
 
@@ -221,5 +221,6 @@ class DataPreparator(BlocksCalculator):
         )(data.get('name'), data.get('data'), block_num)
 
 
+@dataclass(repr=False, eq=False, init=False)
 class PluginBase:
     pass
