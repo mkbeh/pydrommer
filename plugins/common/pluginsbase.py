@@ -87,10 +87,10 @@ class _ArgValueTypeDefiner:
 
 @dataclass(repr=False, eq=False, init=False)
 class BlocksCalculator(_ArgValueTypeDefiner):
-    def __init__(self, *args, hosts_block_size=3, ports_block_size=2):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args)
-        self._hosts_block_size = hosts_block_size
-        self._ports_block_size = ports_block_size
+        self._hosts_block_size = kwargs.get('hosts_block_size')
+        self._ports_block_size = kwargs.get('ports_block_size')
         self.data_types = self.get_data_types()
 
         self._blocks_calculators = {
