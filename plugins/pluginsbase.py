@@ -78,7 +78,7 @@ class _ArgValueTypeDefiner:
         hosts_type = self._define_data('hosts', self._hosts_type_definers, self._hosts)
         ports_type = self._define_data('ports', self._ports_type_definers, self._ports)
 
-        return hosts_type, ports_type
+        return {'hosts': hosts_type, 'ports': ports_type}
 
 
 @dataclass(repr=False, eq=False, init=False)
@@ -145,7 +145,7 @@ class BlocksCalculator:
     def num_blocks(self):
         num_blocks_data = {}
 
-        for data in self._definer.data_types:
+        for data in self._definer.data_types.values():
             try:
                 num_blocks = self._blocks_calculators.get(data['type'])(
                     data['name'], data['data']
@@ -160,10 +160,11 @@ class BlocksCalculator:
 
 @dataclass(repr=False, eq=False, init=False)
 class DataPreparator(BlocksCalculator):
-    def __init__(self, hosts, ports='1-65535', hosts_block_size=10, ports_block_size=20):
-        super().__init__(hosts, ports, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
+    def __init__(self, *args, hosts_block_size=10, ports_block_size=20):
+        super().__init__(*args, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
+        self.hosts_data, self.ports_data = self._definer.data_types
         self.data_getters = {
-            'single': self.data_single,
+            'single': self.get_single_data,
             'file': self.data_from_file,
             'subnet': self.data_from_subnet,
 
@@ -172,65 +173,29 @@ class DataPreparator(BlocksCalculator):
             'combined': self.data_from_combined
         }
 
-    @property
-    def data_single(self):
-        yield
+    @staticmethod
+    def get_single_data(data, block_num):
+        seq = (data,)
+        return seq if block_num else seq
 
-    @property
     def data_from_file(self):
         yield
 
-    @property
     def data_from_subnet(self):
         yield
 
-    @property
     def data_from_range(self):
         yield
 
-    @property
     def data_from_separated(self):
         yield
 
-    @property
     def data_from_combined(self):
         yield
 
-    @property
-    def data_block(self):
-        yield
+    def get_data_block(self, block_num, data_belong_to=None):
+        data = self._definer.data_types.get(data_belong_to)
 
-    def get_data(self):
-        hosts_data, ports_data = self._definer.data_types
-        hosts_getter = self.data_getters.get(hosts_data['type'])
-        ports_getter = self.data_getters.get(ports_data['type'])
-
-
-class Test(DataPreparator):
-    def __init__(self, hosts, ports='1-65535', hosts_block_size=10, ports_block_size=20):
-        super().__init__(hosts, ports, hosts_block_size, ports_block_size)
-
-    def test(self):
-        # TODO
-        #   1. получить кол-во блоков для хостов и портов
-        #   2. запустить бесконечный цикл
-        #   3. в бесконечном цикле вызывать получение блоков данных хостов и портов
-        #   4. запускать корутины для блока хостов и портов для чека.
-        #   5.* сделать флаг: например получить только блок хостов , потому что в icmp пинге не нужны порты.
-        print(self._definer.data_types)
-        print(self.num_blocks)
-
-
-r = Test('1.1.1.1').test()
-
-
-"""
-В каждом плагине должен быть вызов блока данных хостов и портов в бесконечном цикле
-Предварительно в каждом плагине получить расчет кол-ва блоков
-
-** получать блоки данных отдельно по флагам хост или порт
-"""
-
-
-# obj = DataPreparator('1.1.1.1', '80')
-# obj.get_data()
+        return self.data_getters.get(
+           data.get('type')
+        )(data.get('data'), block_num)
