@@ -114,7 +114,7 @@ class BlocksCalculator(_ArgValueTypeDefiner):
         pass
 
     def _calc_file_blocks_num(self, name, val):
-        lines_num = utils.count_lines(val)
+        lines_num = utils.count_lines(val) + 1
         return self._calc_blocks(name, lines_num)
 
     def _calc_subnet_blocks_num(self, name, val):
@@ -180,7 +180,7 @@ class DataPreparator(BlocksCalculator):
 
     def calc_block_range(self, name, block_num):
         block_size = self.__dict__.get(f'_{name}_block_size')
-        end = block_num * block_size
+        end = block_num * block_size + 1
         start = end - block_size
 
         return start, end
@@ -212,8 +212,7 @@ class DataPreparator(BlocksCalculator):
 
     def get_data_block(self, block_num, data_belong_to=None):
         data = self.data_types.get(data_belong_to)
-        new_block_num = 1 if block_num == 0 else block_num
 
         return self.data_getters.get(
            data.get('type')
-        )(data.get('name'), data.get('data'), new_block_num)
+        )(data.get('name'), data.get('data'), block_num)
