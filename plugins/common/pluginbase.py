@@ -180,7 +180,7 @@ class DataPreparator(BlocksCalculator):
 
     def calc_block_range(self, name, block_num):
         block_size = self.__dict__.get(f'_{name}_block_size')
-        end = block_num * block_size + 1
+        end = block_num * block_size
         start = end - block_size
 
         return start, end
@@ -198,8 +198,11 @@ class DataPreparator(BlocksCalculator):
         linecache.clearcache()
         return filter(lambda x: x != '', lines)
 
-    def data_from_subnet(self):
-        yield
+    def data_from_subnet(self, name, data, block_num):
+        start, end = self.calc_block_range(name, block_num)
+        data_slice = IPNetwork(data)[start:end]
+
+        return (el.format() for el in data_slice)
 
     def data_from_range(self):
         yield
@@ -216,3 +219,7 @@ class DataPreparator(BlocksCalculator):
         return self.data_getters.get(
            data.get('type')
         )(data.get('name'), data.get('data'), block_num)
+
+
+class PluginBase:
+    pass
