@@ -173,9 +173,9 @@ class DataPreparator(BlocksCalculator):
             'file': self.get_data_from_file,
             'subnet': self.get_data_from_subnet,
 
-            'range': self.data_from_range,
-            'separated': self.data_from_separated,
-            'combined': self.data_from_combined
+            'range': self.get_data_from_range,
+            'separated': self.get_data_from_separated,
+            'combined': self.get_data_from_combined
         }
 
     def calc_block_range(self, name, block_num):
@@ -204,14 +204,14 @@ class DataPreparator(BlocksCalculator):
 
         return (el.format() for el in data_slice)
 
-    def data_from_range(self):
-        yield
+    def get_data_from_range(self):
+        pass
 
-    def data_from_separated(self):
-        yield
+    def get_data_from_separated(self):
+        pass
 
-    def data_from_combined(self):
-        yield
+    def get_data_from_combined(self):
+        pass
 
     def get_data_block(self, block_num, data_belong_to=None):
         data = self.data_types.get(data_belong_to)
