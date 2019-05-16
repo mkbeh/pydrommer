@@ -99,7 +99,7 @@ class BlocksCalculator:
         }
 
     def _calc_blocks(self, name, num):
-        block_size = self.__dict__.get(name + '_block_size')
+        block_size = self.__dict__.get(f'_{name}_block_size')
         blocks_num = math.ceil(num / block_size)
 
         return 1 if blocks_num == 0 else utils.truncate(blocks_num)
@@ -121,7 +121,7 @@ class BlocksCalculator:
 
         if valid_range:
             range_len = utils.sub_nums_in_seq(*nums)
-            return self._calc_blocks(name, range_len)
+            return self._calc_blocks(name, range_len + 1)
 
         raise exceptions.InvalidPortsRange(val)
 
@@ -142,7 +142,7 @@ class BlocksCalculator:
         return sum(blocks_counts)
 
     @property
-    def blocks_num(self):
+    def num_blocks(self):
         num_blocks_data = {}
 
         for data in self._definer.data_types:
@@ -160,8 +160,8 @@ class BlocksCalculator:
 
 @dataclass(repr=False, eq=False, init=False)
 class DataPreparator(BlocksCalculator):
-    def __init__(self, hosts, ports=None, hosts_block_size=10, ports_block_size=20):
-        super().__init__(hosts, ports, hosts_block_size, ports_block_size)
+    def __init__(self, hosts, ports='1-65535', hosts_block_size=10, ports_block_size=20):
+        super().__init__(hosts, ports, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
         self.data_getters = {
             'single': self.data_single,
             'file': self.data_from_file,
@@ -207,6 +207,9 @@ class DataPreparator(BlocksCalculator):
 
 
 class Test(DataPreparator):
+    def __init__(self, hosts, ports='1-65535', hosts_block_size=10, ports_block_size=20):
+        super().__init__(hosts, ports, hosts_block_size, ports_block_size)
+
     def test(self):
         # TODO
         #   1. получить кол-во блоков для хостов и портов
@@ -214,7 +217,11 @@ class Test(DataPreparator):
         #   3. в бесконечном цикле вызывать получение блоков данных хостов и портов
         #   4. запускать корутины для блока хостов и портов для чека.
         #   5.* сделать флаг: например получить только блок хостов , потому что в icmp пинге не нужны порты.
-        print()
+        print(self._definer.data_types)
+        print(self.num_blocks)
+
+
+r = Test('1.1.1.1').test()
 
 
 """
