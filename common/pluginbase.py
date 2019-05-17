@@ -142,7 +142,7 @@ class BlocksCalculator(_ArgValueTypeDefiner):
             try:
                 blocks_counts.append(self._calc_range_blocks_num(name, el))
             except TypeError:
-                blocks_counts.append(1)
+                continue
 
         return sum(blocks_counts)
 
@@ -226,6 +226,12 @@ class DataPreparator(BlocksCalculator):
             try:
                 final_data.append(int(val))
             except ValueError:
+                continue
+
+        for val in vals:
+            try:
+                int(val)
+            except ValueError:
                 final_data.extend(
                     self.get_data_from_range(name, val, block_num)
                 )
@@ -241,5 +247,5 @@ class DataPreparator(BlocksCalculator):
 
 
 @dataclass(repr=False, eq=False, init=False)
-class PluginBase:
+class AsyncPluginBase:
     pass
