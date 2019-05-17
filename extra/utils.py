@@ -36,3 +36,7 @@ def sub_nums_in_seq(first, second):
 
 def clear_string(s):
     return s.strip(' \n')
+
+
+def get_integers_from_range(range_, separator):
+    return map(lambda x: int(x), range_.split(separator))

@@ -204,8 +204,14 @@ class DataPreparator(BlocksCalculator):
 
         return (el.format() for el in data_slice)
 
-    def get_data_from_range(self):
-        pass
+    def get_data_from_range(self, name, range_, block_num):
+        start_block, end_block = self.calc_block_range(name, block_num)
+        start_range, end_range = utils.get_integers_from_range(range_, '-')
+
+        start = start_range + start_block
+        end = start_range + end_block if start_range + end_block < end_range else end_range + 1
+
+        return (i for i in range(start, end))
 
     def get_data_from_separated(self):
         pass
