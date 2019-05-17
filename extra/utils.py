@@ -40,3 +40,7 @@ def clear_string(s):
 
 def get_integers_from_str(str_, separator):
     return map(lambda x: int(x), str_.split(separator))
+
+
+def split_str_by_separator(str_, separator):
+    return str_.split(separator)

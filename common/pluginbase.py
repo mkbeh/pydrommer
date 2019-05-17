@@ -218,8 +218,19 @@ class DataPreparator(BlocksCalculator):
         nums = utils.get_integers_from_str(data, ',')
         return nums if name and block_num else nums
 
-    def get_data_from_combined(self):
-        pass
+    def get_data_from_combined(self, name, data, block_num):
+        vals = utils.split_str_by_separator(data, ',')
+        final_data = []
+
+        for val in vals:
+            try:
+                final_data.append(int(val))
+            except ValueError:
+                final_data.extend(
+                    self.get_data_from_range(name, val, block_num)
+                )
+
+        return (i for i in final_data)
 
     def get_data_block(self, block_num, data_belong_to=None):
         data = self.data_types.get(data_belong_to)
