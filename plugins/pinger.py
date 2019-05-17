@@ -20,8 +20,8 @@ class PingTCP(AsyncPluginBase):
     def __init__(self, hosts, ports='pydrommer-services.lst', hosts_block_size=10, ports_block_size=20):
         super().__init__(hosts, ports, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
 
-    async def foo(self, hosts, ports):
-        print('data', hosts, list(ports))
+    async def foo(self, host, ports):
+        print('data', host, list(ports))
 
     async def test(self):
         print(self.data_types)

@@ -126,8 +126,7 @@ class _BlocksCalculator(_ArgValueTypeDefiner):
         return self._calc_blocks(name, lines_num)
 
     def _calc_service_file_blocks_num(self, name, val):
-        # lines_num = 1001
-        lines_num = 40
+        lines_num = 1001
         num_blocks = self._calc_blocks(name, lines_num)
         return num_blocks if val else num_blocks
 
