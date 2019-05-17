@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from plugins.pinger import PingTCP, PingICMP
+from plugins.pinger import TCPPing, ICMPPing
 
 """
 ключ х убрать и читать всегда первый параметр из сусаргв , он и будет хостом
@@ -16,8 +16,8 @@ CLI_KEYS = [
 ]
 
 CLI_OPTIONS = {
-    '-pI': PingICMP,
-    '-PT': PingTCP,
+    '-pI': ICMPPing,
+    '-PT': TCPPing,
     '-sP': '',
 }
 
