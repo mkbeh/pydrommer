@@ -38,5 +38,5 @@ def clear_string(s):
     return s.strip(' \n')
 
 
-def get_integers_from_range(range_, separator):
-    return map(lambda x: int(x), range_.split(separator))
+def get_integers_from_str(str_, separator):
+    return map(lambda x: int(x), str_.split(separator))
