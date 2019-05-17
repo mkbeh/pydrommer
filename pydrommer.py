@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from plugins.pinger import TCPPing, ICMPPing
+from plugins.pingers import TCPPing, ICMPPing
 
 """
 ключ х убрать и читать всегда первый параметр из сусаргв , он и будет хостом
