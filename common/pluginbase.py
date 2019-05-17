@@ -3,6 +3,7 @@ import os
 import re
 import math
 import linecache
+import asyncio
 
 from dataclasses import dataclass, field
 
@@ -251,9 +252,21 @@ class AsyncPluginBase(_DataPreparator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    async def plugin_handler(func, hosts_block, ports_block=None):
+        if ports_block:
+            genexpr = (func(host, ports_block) for host in hosts_block)
+        else:
+            genexpr = (func(host) for host in hosts_block)
+
+        await asyncio.gather(*genexpr)
+
     async def run_plugin(self, func, require_ports=False):
         for host_block_num in range(self.num_blocks['hosts']):
-            pass
+            host_data_block = self.get_data_block(host_block_num + 1, data_belong_to='hosts')
+            await self.plugin_handler(func, host_data_block)
+
             if require_ports:
                 for port_block_num in range(self.num_blocks['ports']):
-                    pass
+                    port_data_block = self.get_data_block(host_block_num + 1, data_belong_to='hosts')
+                    await self.plugin_handler(func, host_data_block, port_data_block)
