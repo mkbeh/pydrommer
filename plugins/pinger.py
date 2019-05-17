@@ -21,8 +21,7 @@ class PingTCP(AsyncPluginBase):
         super().__init__(hosts, ports, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
 
     async def foo(self, hosts, ports):
-        print('hosts', hosts)
-        print('ports', list(ports))
+        print('data', hosts, list(ports))
 
     async def test(self):
         print(self.data_types)

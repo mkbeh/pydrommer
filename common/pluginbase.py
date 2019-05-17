@@ -4,6 +4,7 @@ import re
 import math
 import linecache
 import asyncio
+import itertools
 
 from dataclasses import dataclass, field
 
@@ -221,7 +222,7 @@ class _DataPreparator(_BlocksCalculator):
             return str_.split('\t')[1].split('/')[0]
 
         linecache.clearcache()
-        return (get_port_from_str(line) for line in lines if line != '')
+        return [get_port_from_str(line) for line in lines if line != '']
 
     def _get_data_from_subnet(self, name, data, block_num):
         start, end = self._calc_block_range(name, block_num)
@@ -292,7 +293,8 @@ class AsyncPluginBase(_DataPreparator):
 
             if require_ports:
                 for port_block_num in range(self.num_blocks['ports']):
+                    hosts_data_block, hosts_data_block_cp = itertools.tee(hosts_data_block)
                     ports_data_block = self.get_data_block(port_block_num + 1, data_belong_to='ports')
-                    await self.plugin_handler(func, hosts_data_block, ports_data_block)
+                    await self.plugin_handler(func, hosts_data_block_cp, ports_data_block)
             else:
                 await self.plugin_handler(func, hosts_data_block)
