@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import operator
 import itertools
 
@@ -44,3 +45,12 @@ def get_integers_from_str(str_, separator):
 
 def split_str_by_separator(str_, separator):
     return str_.split(separator)
+
+
+def get_abs_path(path_to):
+    return os.path.abspath(path_to)
+
+
+def get_path_to_services_file(path_to):
+    path = get_abs_path(path_to)
+    return path.replace('plugins/', 'common/')

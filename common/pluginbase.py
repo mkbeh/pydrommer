@@ -33,6 +33,7 @@ class _ArgValueTypeDefiner:
             'separated': self._is_separated,
             'combined': self._is_combined,
             'file': self._is_file,
+            'service_file': self._is_service_file,
             'single': self._is_single,
         }
 
@@ -54,6 +55,10 @@ class _ArgValueTypeDefiner:
     @staticmethod
     def _is_file(val):
         return os.path.isfile(val)
+
+    @staticmethod
+    def _is_service_file(val):
+        return True if val == 'pydrommer-services1.lst' else True
 
     def _is_range(self, val):
         pattern = re.compile(r'^\d+-\d+$')
@@ -97,11 +102,12 @@ class _BlocksCalculator(_ArgValueTypeDefiner):
         self._blocks_calculators = {
             'single': self._calc_single_block_num,
             'file': self._calc_file_blocks_num,
+            'service_file': self._calc_service_file_blocks_num,
             'subnet': self._calc_subnet_blocks_num,
 
             'range': self._calc_range_blocks_num,
             'separated': self._calc_separated_blocks_num,
-            'combined': self._calc_combined_blocks_num
+            'combined': self._calc_combined_blocks_num,
         }
 
     def _calc_blocks(self, name, num):
@@ -117,6 +123,12 @@ class _BlocksCalculator(_ArgValueTypeDefiner):
     def _calc_file_blocks_num(self, name, val):
         lines_num = utils.count_lines(val) + 1
         return self._calc_blocks(name, lines_num)
+
+    def _calc_service_file_blocks_num(self, name, val):
+        # lines_num = 1001
+        lines_num = 40
+        num_blocks = self._calc_blocks(name, lines_num)
+        return num_blocks if val else num_blocks
 
     def _calc_subnet_blocks_num(self, name, val):
         addrs_num = len(IPNetwork(val))
@@ -175,7 +187,8 @@ class _DataPreparator(_BlocksCalculator):
 
             'range': self._get_data_from_range,
             'separated': self._get_data_from_separated,
-            'combined': self._get_data_from_combined
+            'combined': self._get_data_from_combined,
+            'service_file': self._get_data_from_service_file,
         }
 
     def _calc_block_range(self, name, block_num):
@@ -197,6 +210,18 @@ class _DataPreparator(_BlocksCalculator):
 
         linecache.clearcache()
         return filter(lambda x: x != '', lines)
+
+    def _get_data_from_service_file(self, name, file, block_num):
+        path_to_service_file = utils.get_path_to_services_file(file)
+        start, end = self._calc_block_range(name, block_num)
+        lines = (utils.clear_string(linecache.getline(path_to_service_file, line_num))
+                 for line_num in range(start, end))
+
+        def get_port_from_str(str_):
+            return str_.split('\t')[1].split('/')[0]
+
+        linecache.clearcache()
+        return (get_port_from_str(line) for line in lines if line != '')
 
     def _get_data_from_subnet(self, name, data, block_num):
         start, end = self._calc_block_range(name, block_num)
@@ -263,10 +288,11 @@ class AsyncPluginBase(_DataPreparator):
 
     async def run_plugin(self, func, require_ports=False):
         for host_block_num in range(self.num_blocks['hosts']):
-            host_data_block = self.get_data_block(host_block_num + 1, data_belong_to='hosts')
-            await self.plugin_handler(func, host_data_block)
+            hosts_data_block = self.get_data_block(host_block_num + 1, data_belong_to='hosts')
 
             if require_ports:
                 for port_block_num in range(self.num_blocks['ports']):
-                    port_data_block = self.get_data_block(host_block_num + 1, data_belong_to='hosts')
-                    await self.plugin_handler(func, host_data_block, port_data_block)
+                    ports_data_block = self.get_data_block(port_block_num + 1, data_belong_to='ports')
+                    await self.plugin_handler(func, hosts_data_block, ports_data_block)
+            else:
+                await self.plugin_handler(func, hosts_data_block)
