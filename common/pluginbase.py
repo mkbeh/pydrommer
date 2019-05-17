@@ -86,7 +86,7 @@ class _ArgValueTypeDefiner:
 
 
 @dataclass(repr=False, eq=False, init=False)
-class BlocksCalculator(_ArgValueTypeDefiner):
+class _BlocksCalculator(_ArgValueTypeDefiner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
         self._hosts_block_size = kwargs.get('hosts_block_size')
@@ -163,22 +163,21 @@ class BlocksCalculator(_ArgValueTypeDefiner):
 
 
 @dataclass(repr=False, eq=False, init=False)
-class DataPreparator(BlocksCalculator):
-    def __init__(self, hosts, ports='1-65535', hosts_block_size=10, ports_block_size=20):
-        super().__init__(hosts, ports, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
-        self.hosts_data, self.ports_data = self.data_types
+class _DataPreparator(_BlocksCalculator):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.num_blocks = self.get_num_blocks()
-        self.data_getters = {
-            'single': self.get_single_data,
-            'file': self.get_data_from_file,
-            'subnet': self.get_data_from_subnet,
+        self._data_getters = {
+            'single': self._get_single_data,
+            'file': self._get_data_from_file,
+            'subnet': self._get_data_from_subnet,
 
-            'range': self.get_data_from_range,
-            'separated': self.get_data_from_separated,
-            'combined': self.get_data_from_combined
+            'range': self._get_data_from_range,
+            'separated': self._get_data_from_separated,
+            'combined': self._get_data_from_combined
         }
 
-    def calc_block_range(self, name, block_num):
+    def _calc_block_range(self, name, block_num):
         block_size = self.__dict__.get(f'_{name}_block_size')
         end = block_num * block_size
         start = end - block_size
@@ -186,26 +185,26 @@ class DataPreparator(BlocksCalculator):
         return start, end
 
     @staticmethod
-    def get_single_data(name, data, block_num):
+    def _get_single_data(name, data, block_num):
         seq = (data,)
         return seq if block_num and name else seq
 
-    def get_data_from_file(self, name, file, block_num):
-        start, end = self.calc_block_range(name, block_num)
+    def _get_data_from_file(self, name, file, block_num):
+        start, end = self._calc_block_range(name, block_num)
         lines = (utils.clear_string(linecache.getline(file, line_num))
                  for line_num in range(start, end))
 
         linecache.clearcache()
         return filter(lambda x: x != '', lines)
 
-    def get_data_from_subnet(self, name, data, block_num):
-        start, end = self.calc_block_range(name, block_num)
+    def _get_data_from_subnet(self, name, data, block_num):
+        start, end = self._calc_block_range(name, block_num)
         data_slice = IPNetwork(data)[start:end]
 
         return (el.format() for el in data_slice)
 
-    def get_data_from_range(self, name, range_, block_num):
-        start_block, end_block = self.calc_block_range(name, block_num)
+    def _get_data_from_range(self, name, range_, block_num):
+        start_block, end_block = self._calc_block_range(name, block_num)
         start_range, end_range = utils.get_integers_from_str(range_, '-')
 
         start = start_range + start_block
@@ -214,11 +213,11 @@ class DataPreparator(BlocksCalculator):
         return (i for i in range(start, end))
 
     @staticmethod
-    def get_data_from_separated(name, data, block_num):
+    def _get_data_from_separated(name, data, block_num):
         nums = utils.get_integers_from_str(data, ',')
         return nums if name and block_num else nums
 
-    def get_data_from_combined(self, name, data, block_num):
+    def _get_data_from_combined(self, name, data, block_num):
         vals = utils.split_str_by_separator(data, ',')
         final_data = []
 
@@ -233,7 +232,7 @@ class DataPreparator(BlocksCalculator):
                 int(val)
             except ValueError:
                 final_data.extend(
-                    self.get_data_from_range(name, val, block_num)
+                    self._get_data_from_range(name, val, block_num)
                 )
 
         return (i for i in final_data)
@@ -241,11 +240,19 @@ class DataPreparator(BlocksCalculator):
     def get_data_block(self, block_num, data_belong_to=None):
         data = self.data_types.get(data_belong_to)
 
-        return self.data_getters.get(
+        return self._data_getters.get(
            data.get('type')
         )(data.get('name'), data.get('data'), block_num)
 
 
 @dataclass(repr=False, eq=False, init=False)
-class AsyncPluginBase:
-    pass
+class AsyncPluginBase(_DataPreparator):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    async def run_plugin(self, func, require_ports=False):
+        for host_block_num in range(self.num_blocks['hosts']):
+            pass
+            if require_ports:
+                for port_block_num in range(self.num_blocks['ports']):
+                    pass
