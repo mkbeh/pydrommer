@@ -221,11 +221,12 @@ class _DataPreparator(_BlocksCalculator):
         vals = utils.split_str_by_separator(data, ',')
         final_data = []
 
-        for val in vals:
-            try:
-                final_data.append(int(val))
-            except ValueError:
-                continue
+        if block_num == 1:
+            for val in vals:
+                try:
+                    final_data.append(int(val))
+                except ValueError:
+                    continue
 
         for val in vals:
             try:
