@@ -2,8 +2,17 @@
 import time
 import asyncio
 
+from extra import utils, decorators
+
 
 class TCPBase:
+    tmp_file = utils.create_tmp_file(prefix='pydrommer_')
+
+    def __init__(self, *args, **kwargs):
+        super(TCPBase, self).__init__(*args, **kwargs)
+        self._timeout = kwargs.get('timeout', .1)
+        self._read_timeout = kwargs.get('read_timeout', .1)
+
     @staticmethod
     async def close_conn(sock):
         sock.close()
@@ -23,10 +32,11 @@ class TCPBase:
             await self.close_conn(writer)
             return host, port
 
-    async def find_open_ports(self, host, ports, timeout=.1, read_timeout=.1):
-        time.sleep(timeout)
+    @decorators.async_log(tmp_file)
+    async def find_open_ports(self, host, ports):
+        time.sleep(self._timeout)
         open_ports = await asyncio.gather(
-            *(self.check_on_open_port(host, port, read_timeout) for port in ports)
+            *(self.check_on_open_port(host, port, self._read_timeout) for port in ports)
         )
 
         return filter(lambda x: isinstance(x, tuple), open_ports)
