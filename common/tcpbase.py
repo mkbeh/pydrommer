@@ -3,7 +3,7 @@ import time
 import asyncio
 
 
-class BaseTCP:
+class TCPBase:
     @staticmethod
     async def close_conn(sock):
         sock.close()
@@ -28,4 +28,5 @@ class BaseTCP:
         open_ports = await asyncio.gather(
             *(self.check_on_open_port(host, port, read_timeout) for port in ports)
         )
-        print(open_ports)
+
+        return filter(lambda x: isinstance(x, tuple), open_ports)

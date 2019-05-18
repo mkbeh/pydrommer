@@ -2,6 +2,7 @@
 import os
 import operator
 import itertools
+import tempfile
 
 
 def count_lines(filename, chunk_size=1 << 13):
@@ -54,3 +55,7 @@ def get_abs_path(path_to):
 def get_path_to_services_file(path_to):
     path = get_abs_path(path_to)
     return path.replace('plugins/', 'common/')
+
+
+def create_tmp_file(prefix='', suffix=''):
+    return tempfile.mkstemp(prefix=prefix, suffix=suffix)[1]

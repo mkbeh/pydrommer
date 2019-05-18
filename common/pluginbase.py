@@ -10,8 +10,7 @@ from dataclasses import dataclass, field
 
 from netaddr import IPNetwork
 
-from extra import utils
-from extra import exceptions
+from extra import utils, decorators, exceptions
 
 
 @dataclass(repr=False, eq=False)
@@ -274,17 +273,20 @@ class _DataPreparator(_BlocksCalculator):
 
 @dataclass(repr=False, eq=False, init=False)
 class AsyncPluginBase(_DataPreparator):
+    tmp_file = utils.create_tmp_file(prefix='pydrommer_')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     @staticmethod
+    @decorators.async_log(tmp_file)
     async def plugin_handler(func, hosts_block, ports_block=None):
         if ports_block:
             genexpr = (func(host, ports_block) for host in hosts_block)
         else:
             genexpr = (func(host) for host in hosts_block)
 
-        await asyncio.gather(*genexpr)
+        return await asyncio.gather(*genexpr)
 
     async def run_plugin(self, func, require_ports=False):
         for host_block_num in range(self.num_blocks['hosts']):
