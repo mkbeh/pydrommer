@@ -9,10 +9,10 @@ class BaseTCP:
         sock.close()
         await sock.wait_closed()
 
-    async def check_on_open_port(self, host, port):
+    async def check_on_open_port(self, host, port, read_timeout):
         try:
             _, writer = await asyncio.wait_for(
-                asyncio.open_connection(host, port), timeout=.1
+                asyncio.open_connection(host, port), timeout=read_timeout
             )
         except asyncio.TimeoutError:
             return
@@ -24,9 +24,9 @@ class BaseTCP:
             await self.close_conn(writer)
             return host, port
 
-    async def find_open_ports(self, host, ports):
-        time.sleep(.1)
+    async def find_open_ports(self, host, ports, timeout=.1, read_timeout=.1):
+        time.sleep(timeout)
         open_ports = await asyncio.gather(
-            *(self.check_on_open_port(host, port) for port in ports)
+            *(self.check_on_open_port(host, port, read_timeout) for port in ports)
         )
         print(open_ports)
