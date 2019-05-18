@@ -6,18 +6,6 @@ from common.pluginbase import AsyncPluginBase
 from common.basetcp import BaseTCP
 
 
-# TODO
-#   2. Решить вопрос с исключением ConnectionRefusedError // N-20-5-1-stop
-#   4. Разобраться как грабить баннеры
-#   6. Добавить кли интерфейс (ключи)
-#   - -v режим вербализации
-#   - -p порты/диапазон портов
-#   - -o вывод в файл
-#   - -Pn: Treat all hosts as online -- skip host discovery
-#   7. Сделать paused.conf
-#   8. нужен какой то общий хэндлер , который в зависимости от ключей будет сам вызывать нужные методы.
-
-
 class PortsChecker(AsyncPluginBase, BaseTCP):
     def __init__(self, hosts, ports='1-65535', hosts_block_size=10,
                  ports_block_size=20, timeout=.1, read_timeout=.1):
