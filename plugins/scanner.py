@@ -7,7 +7,7 @@ from common.tcpbase import TCPBase
 
 
 class PortsChecker(AsyncPluginBase, TCPBase):
-    def __init__(self, hosts, ports='1-65535', hosts_block_size=10,
+    def __init__(self, hosts, ports='1-100', hosts_block_size=10,
                  ports_block_size=20, timeout=.1, read_timeout=.1):
         super().__init__(hosts, ports, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
         self._timeout = timeout

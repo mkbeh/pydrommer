@@ -14,8 +14,8 @@ def async_log(file):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            data = await func(*args, **kwargs)
-            await write_to_file(file, data)
+            blocks = await func(*args, **kwargs)
+            await write_to_file(file, blocks)
 
         return wrapper
     return decorator
