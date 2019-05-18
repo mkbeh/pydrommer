@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import asyncio
+import functools
 
 from common.pluginbase import AsyncPluginBase
 from common.basetcp import BaseTCP
-from extra import utils
+
 
 # TODO
 #   2. Решить вопрос с исключением ConnectionRefusedError // N-20-5-1-stop
@@ -17,21 +18,20 @@ from extra import utils
 #   8. нужен какой то общий хэндлер , который в зависимости от ключей будет сам вызывать нужные методы.
 
 
-PORTS_NUM = 65535
-HOSTS_BLOCK_SIZE = 5          # кол-во хостов из файла
-PORTS_BLOCK_SIZE = 25         # кол-во портов которые будут одновременно браться 25
-TIMEOUT = 20
-READ_TIMEOUT = .1
-
-
 class PortsChecker(AsyncPluginBase, BaseTCP):
-    def __init__(self, hosts, ports='pydrommer-services.lst', hosts_block_size=10, ports_block_size=20):
+    def __init__(self, hosts, ports='1-65535', hosts_block_size=10,
+                 ports_block_size=20, timeout=.1, read_timeout=.1):
         super().__init__(hosts, ports, hosts_block_size=hosts_block_size, ports_block_size=ports_block_size)
+        self._timeout = timeout
+        self._read_timeout = read_timeout
 
     async def tcp_ping(self):
-        await self.run_plugin(self.find_open_ports, require_ports=True)
+        await self.run_plugin(
+            functools.partial(self.find_open_ports, timeout=self._timeout, read_timeout=self._read_timeout),
+            require_ports=True
+        )
 
 
-# 192.0.2.16/28
-asyncio.get_event_loop().run_until_complete(PortsChecker('').tcp_ping())
+from test_data import secret
+asyncio.get_event_loop().run_until_complete(PortsChecker(secret.node).tcp_ping())
 

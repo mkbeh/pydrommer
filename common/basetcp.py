@@ -18,8 +18,7 @@ class BaseTCP:
             return
         except ConnectionRefusedError:
             # эта ошибка вылетает когда слишком много одновременных соединений открыто
-            pass
-            # raise
+            raise
         else:
             await self.close_conn(writer)
             return host, port
