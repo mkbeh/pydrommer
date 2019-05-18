@@ -277,7 +277,7 @@ class AsyncPluginBase(_DataPreparator):
         super().__init__(*args, **kwargs)
 
     @staticmethod
-    async def plugin_handler(func, hosts_block, ports_block=None):
+    async def _plugin_handler(func, hosts_block, ports_block=None):
         if ports_block:
             genexpr = (func(host, ports_block) for host in hosts_block)
         else:
@@ -293,6 +293,6 @@ class AsyncPluginBase(_DataPreparator):
                 for port_block_num in range(self.num_blocks['ports']):
                     hosts_data_block, hosts_data_block_cp = itertools.tee(hosts_data_block)
                     ports_data_block = self.get_data_block(port_block_num + 1, data_belong_to='ports')
-                    await self.plugin_handler(func, hosts_data_block_cp, ports_data_block)
+                    await self._plugin_handler(func, hosts_data_block_cp, ports_data_block)
             else:
-                await self.plugin_handler(func, hosts_data_block)
+                await self._plugin_handler(func, hosts_data_block)
