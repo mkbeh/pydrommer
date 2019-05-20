@@ -32,7 +32,7 @@ class TCPBase:
             await self.close_conn(writer)
             return host, port
 
-    @decorators.async_log(tmp_file)
+    @decorators.async_writer(tmp_file)
     async def find_open_ports(self, host, ports):
         time.sleep(self._timeout)
         open_ports = await asyncio.gather(

@@ -59,3 +59,22 @@ def get_path_to_services_file(path_to):
 
 def create_tmp_file(prefix='', suffix=''):
     return tempfile.mkstemp(prefix=prefix, suffix=suffix)[1]
+
+
+def make_work_dir(dir_name):
+    path = os.path.join(
+        os.getenv('XDG_DATA_HOME', os.path.expanduser("~/.local/share")), dir_name
+    )
+
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    return path
+
+
+def get_file_path(dir_name, file_name):
+    work_dir = make_work_dir(dir_name)
+
+    return os.path.join(
+        work_dir, file_name
+    )
