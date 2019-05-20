@@ -78,3 +78,7 @@ def get_file_path(dir_name, file_name):
     return os.path.join(
         work_dir, file_name
     )
+
+
+def remove_file(file):
+    os.remove(file)
