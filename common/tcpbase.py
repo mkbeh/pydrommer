@@ -18,10 +18,10 @@ class TCPBase:
         sock.close()
         await sock.wait_closed()
 
-    async def check_on_open_port(self, host, port, read_timeout):
+    async def check_on_open_port(self, host, port):
         try:
             _, writer = await asyncio.wait_for(
-                asyncio.open_connection(host, port), timeout=read_timeout
+                asyncio.open_connection(host, port), timeout=self._read_timeout
             )
         except asyncio.TimeoutError:
             return
@@ -36,7 +36,7 @@ class TCPBase:
     async def find_open_ports(self, host, ports):
         time.sleep(self._timeout)
         open_ports = await asyncio.gather(
-            *(self.check_on_open_port(host, port, self._read_timeout) for port in ports)
+            *(self.check_on_open_port(host, port) for port in ports)
         )
 
         return filter(lambda x: isinstance(x, tuple), open_ports)
