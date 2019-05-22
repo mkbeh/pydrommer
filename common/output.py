@@ -49,7 +49,7 @@ class Output(IPSorter):
 
     def __init__(self, *args, **kwargs):
         super(Output, self).__init__(*args, **kwargs)
-        self._output_to = kwargs.get('output_to')
+        self.output_to = kwargs.get('output_to', 'file')
         self._output_writers = {
             'file': self._to_file,
         }
@@ -72,20 +72,18 @@ class Output(IPSorter):
 
         writer(f'{ip}:{ports}\n')
 
-    def _get_ips_with_ports_for_ips_block(self, ips_block):
-        writer = self._output_writers.get(self._output_to)
+    def _get_ips_with_ports_for_ips_block(self, ips_block, ):
+        writer = self._output_writers.get(self.output_to)
         [self._find_ports_for_each_ip(writer, ip) for ip in ips_block]
 
     def output(self, tmp_file):
-        self._output_to = self._output_to
         self._tmp_file = tmp_file
         self.temp_fh = open(self._tmp_file, 'r+')
         ips = self.get_uniq_ips()
-        block_num = 0
 
         while True:
             ips_slice, ips_slice_cp = itertools.tee(
-                itertools.islice(ips, block_num, self._data_block_size)
+                itertools.islice(ips, 0, self._data_block_size)
             )
 
             if not self._is_contains_elements(ips_slice_cp):

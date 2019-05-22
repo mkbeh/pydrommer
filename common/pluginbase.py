@@ -100,7 +100,7 @@ class _ArgValueTypeDefiner:
 class _BlocksCalculator(_ArgValueTypeDefiner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
-        self._hosts_block_size = kwargs.get('hosts_block_size', 10)
+        self._hosts_block_size = kwargs.get('hosts_block_size', 35)
         self._ports_block_size = kwargs.get('ports_block_size', 20)
         self.data_types = self.get_data_types()
 
@@ -288,7 +288,7 @@ class AsyncPluginBase(_DataPreparator):
         else:
             genexpr = (func(host) for host in hosts_block)
 
-        return await asyncio.gather(*genexpr)
+        await asyncio.gather(*genexpr)
 
     async def run_plugin(self, func, require_ports=False):
         for host_block_num in range(self.num_blocks['hosts']):
@@ -297,7 +297,7 @@ class AsyncPluginBase(_DataPreparator):
             if require_ports:
                 for port_block_num in range(self.num_blocks['ports']):
                     hosts_data_block, hosts_data_block_cp = itertools.tee(hosts_data_block)
-                    ports_data_block = self.get_data_block(port_block_num + 1, data_belong_to='ports')
+                    ports_data_block = list(self.get_data_block(port_block_num + 1, data_belong_to='ports'))
                     await self._plugin_handler(func, hosts_data_block_cp, ports_data_block)
             else:
                 await self._plugin_handler(func, hosts_data_block)

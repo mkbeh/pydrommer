@@ -6,7 +6,7 @@ from functools import wraps
 async def async_write_to_file(file, block):
     async with aiofiles.open(file, mode='a') as f:
         for data in block:
-            await f.write('{}:{}\n'.format(*data))
+            await f.write(data)
 
 
 def async_writer(file):

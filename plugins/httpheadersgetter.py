@@ -7,6 +7,8 @@ import urllib.parse
 from common.pluginbase import AsyncPluginBase
 from common.output import Output
 
+from extra import utils, decorators
+
 
 class HTTPHeadersGetter(Output, AsyncPluginBase):
     _default_port = 80
@@ -18,9 +20,11 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
         self._only_jsonrpc = kwargs.get('only_jsonrpc', False)
         self._ioloop = kwargs.get('loop')
 
+        self.tmp_file = utils.create_tmp_file(prefix='pydrommer_')
+
     @staticmethod
     async def _prepare_final_data(headers, host, port):
-        node = f'{host}:{port}:'
+        node = f'{host}:{port}-'
 
         if headers:
             for header in headers:
@@ -116,18 +120,20 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
             jsonrpc_header = await self._check_on_jsonrpc(headers)
 
             if jsonrpc_header:
-                return f'{host}:{port}:{jsonrpc_header}'
+                return f'{host}:{port}-{jsonrpc_header}'
 
         return await self._prepare_final_data(headers, host, port)
 
-    # вот здесь декоратор воткнуть на запись успешного рез-та во временный файл
     async def _http_headers_handler(self, host, ports):
         time.sleep(self._timeout)
-        data = await asyncio.gather(
+        data_block = await asyncio.gather(
             *(self.get_http_headers(host, int(port)) for port in ports)
         )
 
-        return filter(lambda x: x is not None, data)
+        await decorators.async_write_to_file(
+            self.tmp_file, filter(lambda x: x is not None, data_block)
+        )
 
     async def http_headers_getter(self):
         await self.run_plugin(self._http_headers_handler, require_ports=True)
+        self.output(self.tmp_file)
