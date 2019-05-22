@@ -8,11 +8,15 @@ from common.pluginbase import AsyncPluginBase
 from common.output import Output
 
 
-class HTTPHeadersGetter:
+class HTTPHeadersGetter(Output, AsyncPluginBase):
+    _default_port = 80
+
     def __init__(self, *args, **kwargs):
         super(HTTPHeadersGetter, self).__init__(*args, **kwargs)
         self._timeout = kwargs.get('timeout', .1)
         self._read_timeout = kwargs.get('read_timeout', .1)
+        self._only_jsonrpc = kwargs.get('only_jsonrpc', False)
+        self._ioloop = kwargs.get('loop')
 
     @staticmethod
     async def _prepare_final_data(headers, host, port):
@@ -86,16 +90,17 @@ class HTTPHeadersGetter:
 
         return reader, writer
 
-    @staticmethod
-    async def _get_valid_url(url):
-        if not url.startswith('http'):
-            return f'http://{url}'
+    async def _get_valid_url(self, url, port):
+        port_ = port if port else self._default_port
+        url_ = (await self._ioloop.getaddrinfo(url, port_))[0][-1][0]
 
-        return url
+        if not url_.startswith('http'):
+            return f'http://{url_}'
 
-    # вот здесь декоратор воткнуть на запись успешного рез-та во временный файл
-    async def get_http_headers(self, host, port=None, only_jsonrpc=False):
-        valid_url = await self._get_valid_url(host)
+        return url_
+
+    async def get_http_headers(self, host, port=None):
+        valid_url = await self._get_valid_url(host, port)
         url = urllib.parse.urlsplit(valid_url)
 
         try:
@@ -107,18 +112,22 @@ class HTTPHeadersGetter:
             headers = await self._read_headers(reader)
             writer.close()
 
-        if only_jsonrpc and headers:
+        if self._only_jsonrpc and headers:
             jsonrpc_header = await self._check_on_jsonrpc(headers)
 
             if jsonrpc_header:
-                print(f'{host}:{port}:{jsonrpc_header}')
                 return f'{host}:{port}:{jsonrpc_header}'
 
-        print(await self._prepare_final_data(headers, host, port))
         return await self._prepare_final_data(headers, host, port)
 
-    async def http_headers_handler(self, host, ports):
+    # вот здесь декоратор воткнуть на запись успешного рез-та во временный файл
+    async def _http_headers_handler(self, host, ports):
         time.sleep(self._timeout)
-        await asyncio.gather(
-            *(self.get_http_headers(host, port) for port in ports)
+        data = await asyncio.gather(
+            *(self.get_http_headers(host, int(port)) for port in ports)
         )
+
+        return filter(lambda x: x is not None, data)
+
+    async def http_headers_getter(self):
+        await self.run_plugin(self._http_headers_handler, require_ports=True)

@@ -58,7 +58,7 @@ class _ArgValueTypeDefiner:
 
     @staticmethod
     def _is_service_file(val):
-        return True if val == 'pydrommer-services1.lst' else True
+        return True if val == 'pydrommer-services1.lst' else False
 
     def _is_range(self, val):
         pattern = re.compile(r'^\d+-\d+$')
@@ -69,8 +69,13 @@ class _ArgValueTypeDefiner:
         return self._is_str_match(pattern, val)
 
     def _is_combined(self, val):
-        pattern = re.compile(r'^\d+|(d+-\d+),(\d+|(d+-\d+),?)+$')
-        return self._is_str_match(pattern, val)
+        new_val = val.split(',')
+
+        if len(new_val) > 1:
+            pattern = re.compile(r'^\d+|(d+-\d+),(\d+|(d+-\d+),?)+$')
+            return self._is_str_match(pattern, val)
+
+        return False
 
     def _is_single(self, val):
         host_pattern = re.compile(r'^\d+.\d+.\d+.\d+$')
