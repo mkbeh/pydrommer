@@ -79,7 +79,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
 
         return port
 
-    async def _read_handler(self, *args):
+    async def _header_reading_handler(self, *args):
         url, writer, reader = args
         await self._write_query(url.path, url.hostname, writer)
 
@@ -127,7 +127,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
         except (asyncio.TimeoutError, ConnectionRefusedError):
             return
         else:
-            headers = await self._read_handler(url, writer, reader)
+            headers = await self._header_reading_handler(url, writer, reader)
 
         if self._only_jsonrpc and headers:
             jsonrpc_header = await self._check_on_jsonrpc(headers)
