@@ -14,6 +14,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
     _default_port = 80
 
     def __init__(self, *args, **kwargs):
+        kwargs.update({'final_file': 'http_headers'})
         super(HTTPHeadersGetter, self).__init__(*args, **kwargs)
         self._timeout = kwargs.get('timeout', .1)
         self._read_timeout = kwargs.get('read_timeout', .5)

@@ -6,6 +6,7 @@ from common.output import Output
 
 class PortsChecker(Output, TCPBase, AsyncPluginBase):
     def __init__(self, *args, **kwargs):
+        kwargs.update({'final_file': 'ports_checker'})
         super(PortsChecker, self).__init__(*args, **kwargs)
 
     async def scanner(self):

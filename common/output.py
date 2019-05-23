@@ -41,9 +41,6 @@ class IPSorter:
 class Output(IPSorter):
     _data_block_size = 10_000
     _date_now = datetime.now().strftime('%d-%m-%y-%H-%M-%S')
-    _final_fh = open(
-        utils.get_file_path('pydrommer', f'final-{_date_now}.lst'), 'a'
-    )
 
     def __init__(self, *args, **kwargs):
         super(Output, self).__init__(*args, **kwargs)
@@ -51,6 +48,10 @@ class Output(IPSorter):
         self._output_writers = {
             'file': self._to_file,
         }
+        self._final_fh = open(
+            utils.get_file_path('pydrommer',
+                                f'{kwargs.get("final_file")}-final-{self._date_now}.lst'), 'a'
+        )
 
     def _to_file(self, data):
         self._final_fh.write(data)
