@@ -67,7 +67,7 @@ class Output(IPSorter):
 
         with open(self._tmp_file, 'r') as file:
             for line in file:
-                if ip in line:
+                if ip + ':' in line:
                     ports += line.split(':')[1].replace('\n', '').strip() + ' '
 
         writer(f'{ip}:{ports}\n')
