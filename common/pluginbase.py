@@ -24,12 +24,14 @@ class _ArgValueTypeDefiner:
 
     def __post_init__(self):
         self._hosts_type_definers = {
+            'spec': self._is_spec_file,
             'file': self._is_file,
             'single': self._is_single,
             'subnet': self._is_subnet,
             'url': self._is_url,
         }
         self._ports_type_definers = {
+            'spec': self._is_spec_file,
             'range': self._is_range,
             'separated': self._is_separated,
             'combined': self._is_combined,
@@ -54,12 +56,16 @@ class _ArgValueTypeDefiner:
             return True
 
     @staticmethod
-    def _is_file(val):
-        return os.path.isfile(val)
+    def _is_spec_file(val):
+        return val.endswith('.prm')
 
     @staticmethod
     def _is_service_file(val):
         return True if val == 'pydrommer-services1.lst' else False
+
+    @staticmethod
+    def _is_file(val):
+        return os.path.isfile(val)
 
     def _is_range(self, val):
         pattern = re.compile(r'^\d+-\d+$')
@@ -169,8 +175,20 @@ class _BlocksCalculator(_ArgValueTypeDefiner):
 
         return sum(blocks_counts)
 
+    def _check_on_spec_file(self):
+        if self.data_types['hosts']['type'] != 'spec':
+            raise exceptions.SpecialFileNotFound
+
+        hosts_num_blocks = self._calc_file_blocks_num('hosts', self.data_types['hosts']['data'])
+        return {'hosts': hosts_num_blocks}
+
     def get_num_blocks(self):
         num_blocks_data = {}
+
+        try:
+            return self._check_on_spec_file()
+        except exceptions.SpecialFileNotFound:
+            pass
 
         for data in self.data_types.values():
             try:
@@ -200,6 +218,7 @@ class _DataPreparator(_BlocksCalculator):
             'separated': self._get_data_from_separated,
             'combined': self._get_data_from_combined,
             'service_file': self._get_data_from_service_file,
+            'spec': self._get_data_from_spec_file,
         }
 
     def _calc_block_range(self, name, block_num):
@@ -275,6 +294,19 @@ class _DataPreparator(_BlocksCalculator):
 
         return (i for i in final_data)
 
+    def _prepare_data_from_spec_file(self, data):
+        pass
+
+    def _get_data_from_spec_file(self, name, file, block_num):
+        start, end = self._calc_block_range(name, block_num)
+        lines = (utils.clear_string(linecache.getline(file, line_num))
+                 for line_num in range(start, end))
+
+        linecache.clearcache()
+        return map(lambda x: (x[0], x[1].split(' ')),
+                   map(lambda x: x.split(':'),
+                       filter(lambda x: x != '', lines)))
+
     def get_data_block(self, block_num, data_belong_to=None):
         data = self.data_types.get(data_belong_to)
 
@@ -287,17 +319,27 @@ class _DataPreparator(_BlocksCalculator):
 class AsyncPluginBase(_DataPreparator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._data_type_spec = None
 
-    @staticmethod
-    async def _plugin_handler(func, hosts_block, ports_block=None):
+    async def _plugin_handler(self, func, hosts_block, ports_block=None):
         if ports_block:
             genexpr = (func(host, ports_block) for host in hosts_block)
+        elif self._data_type_spec:
+            genexpr = (func(host, ports) for host, ports in hosts_block)
         else:
             genexpr = (func(host) for host in hosts_block)
 
         await asyncio.gather(*genexpr)
 
+    def _is_data_type_spec(self):
+        return True if self.data_types['hosts']['type'] == 'spec' else False
+
     async def run_plugin(self, func, require_ports=False):
+        self._data_type_spec = self._is_data_type_spec()
+
+        if self._data_type_spec:
+            require_ports = False
+
         for host_block_num in range(self.num_blocks['hosts']):
             hosts_data_block = self.get_data_block(host_block_num + 1, data_belong_to='hosts')
 

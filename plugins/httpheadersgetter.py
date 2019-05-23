@@ -17,16 +17,14 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
         kwargs.update({'final_file': 'http_headers'})
         super(HTTPHeadersGetter, self).__init__(*args, **kwargs)
         self._timeout = kwargs.get('timeout', .1)
-        self._read_timeout = kwargs.get('read_timeout', .5)
+        self._read_timeout = kwargs.get('read_timeout', .1)
         self._only_jsonrpc = kwargs.get('only_jsonrpc', False)
-        self._ioloop = kwargs.get('loop')
 
         self.tmp_file = utils.create_tmp_file(prefix='pydrommer_')
 
     @staticmethod
     async def _prepare_final_data(headers, host, port):
         node = f'{host}:{port}-'
-
         if headers:
             for header in headers:
                 node += f'<{header}>'
@@ -43,12 +41,12 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
             if re.search(pattern, header):
                 return header
 
-    @staticmethod
-    async def _read_headers(reader):
+    async def _read_headers(self, reader):
         lines = []
 
         while True:
-            line = await reader.readline()
+            line = await asyncio.wait_for(reader.readline(), self._read_timeout)
+
             if not line:
                 break
 
@@ -80,6 +78,19 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
             port = 80
 
         return port
+
+    async def _read_handler(self, *args):
+        url, writer, reader = args
+        await self._write_query(url.path, url.hostname, writer)
+
+        try:
+            headers = await self._read_headers(reader)
+        except (asyncio.futures.TimeoutError, ConnectionResetError):
+            headers = None
+        finally:
+            writer.close()
+
+        return headers
 
     async def _open_connection(self, url_scheme, url_hostname, port):
         valid_port = await self._get_valid_port(port, url_scheme)
@@ -116,9 +127,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
         except (asyncio.TimeoutError, ConnectionRefusedError):
             return
         else:
-            await self._write_query(url.path, url.hostname, writer)
-            headers = await self._read_headers(reader)
-            writer.close()
+            headers = await self._read_handler(url, writer, reader)
 
         if self._only_jsonrpc and headers:
             jsonrpc_header = await self._check_on_jsonrpc(headers)

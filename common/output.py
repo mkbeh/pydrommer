@@ -50,7 +50,7 @@ class Output(IPSorter):
         }
         self._final_fh = open(
             utils.get_file_path('pydrommer',
-                                f'{kwargs.get("final_file")}-final-{self._date_now}.lst'), 'a'
+                                f'{kwargs.get("final_file")}-final-{self._date_now}.prm'), 'a'
         )
 
     def _to_file(self, data):

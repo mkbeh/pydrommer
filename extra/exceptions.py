@@ -21,4 +21,5 @@ class InvalidPortsRange(BlocksCalculatorExc):
         super().__init__(error_msg=f'Invalid ports range {ports_range}.')
 
 
-
+class SpecialFileNotFound(BlocksCalculatorExc):
+    pass
