@@ -26,7 +26,8 @@ class _ArgValueTypeDefiner:
         self._hosts_type_definers = {
             'file': self._is_file,
             'single': self._is_single,
-            'subnet': self._is_subnet
+            'subnet': self._is_subnet,
+            'url': self._is_url,
         }
         self._ports_type_definers = {
             'range': self._is_range,
@@ -82,6 +83,10 @@ class _ArgValueTypeDefiner:
         port_pattern = re.compile(r'^\d+$')
         return self._is_str_match(host_pattern, val) or self._is_str_match(port_pattern, val)
 
+    def _is_url(self, val):
+        url_pattern = re.compile(r'\w+\.\w+')
+        return self._is_str_match(url_pattern, val) or val.startswith('http')
+
     def _is_subnet(self, val):
         pattern = re.compile(r'^\d+.\d+.\d+.\d+/\d{1,2}$')
         return self._is_str_match(pattern, val)
@@ -109,6 +114,7 @@ class _BlocksCalculator(_ArgValueTypeDefiner):
             'file': self._calc_file_blocks_num,
             'service_file': self._calc_service_file_blocks_num,
             'subnet': self._calc_subnet_blocks_num,
+            'url': self._calc_single_block_num,
 
             'range': self._calc_range_blocks_num,
             'separated': self._calc_separated_blocks_num,
@@ -188,6 +194,7 @@ class _DataPreparator(_BlocksCalculator):
             'single': self._get_single_data,
             'file': self._get_data_from_file,
             'subnet': self._get_data_from_subnet,
+            'url': self._get_single_data,
 
             'range': self._get_data_from_range,
             'separated': self._get_data_from_separated,

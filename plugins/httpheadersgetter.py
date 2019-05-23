@@ -16,7 +16,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
     def __init__(self, *args, **kwargs):
         super(HTTPHeadersGetter, self).__init__(*args, **kwargs)
         self._timeout = kwargs.get('timeout', .1)
-        self._read_timeout = kwargs.get('read_timeout', .1)
+        self._read_timeout = kwargs.get('read_timeout', .5)
         self._only_jsonrpc = kwargs.get('only_jsonrpc', False)
         self._ioloop = kwargs.get('loop')
 
@@ -94,14 +94,17 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
 
         return reader, writer
 
-    async def _get_valid_url(self, url, port):
-        port_ = port if port else self._default_port
-        url_ = (await self._ioloop.getaddrinfo(url, port_))[0][-1][0]
+    @staticmethod
+    async def _get_valid_url(url, port):
+        prefixes = {
+            80: 'http://',
+            443: 'https://'
+        }
 
-        if not url_.startswith('http'):
-            return f'http://{url_}'
+        if not url.startswith('http'):
+            return f'{prefixes.get(port, "http://")}{url}'
 
-        return url_
+        return url
 
     async def get_http_headers(self, host, port=None):
         valid_url = await self._get_valid_url(host, port)
@@ -120,9 +123,9 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
             jsonrpc_header = await self._check_on_jsonrpc(headers)
 
             if jsonrpc_header:
-                return f'{host}:{port}-{jsonrpc_header}'
+                return f'{valid_url}:{port}-{jsonrpc_header}'
 
-        return await self._prepare_final_data(headers, host, port)
+        return await self._prepare_final_data(headers, valid_url, port)
 
     async def _http_headers_handler(self, host, ports):
         time.sleep(self._timeout)
