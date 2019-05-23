@@ -294,8 +294,11 @@ class _DataPreparator(_BlocksCalculator):
 
         return (i for i in final_data)
 
-    def _prepare_data_from_spec_file(self, data):
-        pass
+    @staticmethod
+    def _prepare_data_from_spec_file(lines):
+        return map(lambda x: (x[0], x[1].split(' ')),
+                   map(lambda x: x.split(':'),
+                       filter(lambda x: x != '', lines)))
 
     def _get_data_from_spec_file(self, name, file, block_num):
         start, end = self._calc_block_range(name, block_num)
@@ -303,9 +306,7 @@ class _DataPreparator(_BlocksCalculator):
                  for line_num in range(start, end))
 
         linecache.clearcache()
-        return map(lambda x: (x[0], x[1].split(' ')),
-                   map(lambda x: x.split(':'),
-                       filter(lambda x: x != '', lines)))
+        return self._prepare_data_from_spec_file(lines)
 
     def get_data_block(self, block_num, data_belong_to=None):
         data = self.data_types.get(data_belong_to)
