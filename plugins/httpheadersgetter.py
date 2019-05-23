@@ -118,7 +118,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
 
         return url
 
-    async def get_http_headers(self, host, port=None):
+    async def _get_http_headers(self, host, port=None):
         valid_url = await self._get_valid_url(host, port)
         url = urllib.parse.urlsplit(valid_url)
 
@@ -140,7 +140,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
     async def _http_headers_handler(self, host, ports):
         time.sleep(self._timeout)
         data_block = await asyncio.gather(
-            *(self.get_http_headers(host, int(port)) for port in ports)
+            *(self._get_http_headers(host, int(port)) for port in ports)
         )
 
         await decorators.async_write_to_file(
