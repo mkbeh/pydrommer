@@ -26,8 +26,7 @@ class TCPBase:
         except asyncio.TimeoutError:
             return
         except ConnectionRefusedError:
-            # эта ошибка вылетает когда слишком много одновременных соединений открыто
-            raise
+            return f'{host}:{port}-ConnectionRefusedError\n'
         else:
             await self.close_conn(writer)
             return f'{host}:{port}\n'
