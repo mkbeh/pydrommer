@@ -22,7 +22,8 @@ default_ports = {
 
 def start_plugin(plugin, data):
     uvloop.install()
-    asyncio.run(plugin(data).run())
+    hosts, ports = data.pop('hosts'), data.pop('ports')
+    asyncio.run(plugin(hosts, ports, **data).run())
 
 
 def rename_options(args):
@@ -36,6 +37,7 @@ def rename_options(args):
         'hS': 'hosts_block_size',
         'pS': 'ports_block_size',
         'plugins': 'plugins',
+        'only_jsonrpc': 'only_jsonrpc',
     }
 
     for key in cp.keys():
@@ -70,16 +72,16 @@ def parser_base_options(parser):
 
     parser.add_argument('-iH', required=True, help='Single host or from available input.')
     parser.add_argument('-iP', required=False, help='Single port or from available input.')
-    parser.add_argument('-cT', metavar='SECS', default=.1, help=CYCLE_TIMEOUT_HELP)
-    parser.add_argument('-rT', metavar='SECS', default=.1, help=READ_TIMEOUT_HELP)
+    parser.add_argument('-cT', metavar='SECS', type=float, default=.1, help=CYCLE_TIMEOUT_HELP)
+    parser.add_argument('-rT', metavar='SECS', type=float, default=.1, help=READ_TIMEOUT_HELP)
     parser.add_argument('-o', choices=output_to, default='file', help=OUTPUT_HELP)
-    parser.add_argument('-hS', metavar='NUM', default=35, help=HOSTS_BLOCK_SIZE_HELP)
-    parser.add_argument('-pS', metavar='NUM', default=20, help=PORTS_BLOCK_SIZE_HELP)
+    parser.add_argument('-hS', metavar='NUM', type=int, default=35, help=HOSTS_BLOCK_SIZE_HELP)
+    parser.add_argument('-pS', metavar='NUM', type=int, default=20, help=PORTS_BLOCK_SIZE_HELP)
 
 
 def http_headers_getter_parser(parser):
     parser_base_options(parser)
-    parser.add_argument('--only-jsonrpc', required=False, default=False, help='Will discover only JSON RPC.')
+    parser.add_argument('--only-jsonrpc', required=False, type=bool, default=False, help='Will discover only JSON RPC.')
 
 
 def ports_scanner_parser(parser):
