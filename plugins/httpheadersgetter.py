@@ -11,8 +11,6 @@ from extra import utils, decorators
 
 
 class HTTPHeadersGetter(Output, AsyncPluginBase):
-    _default_port = 80
-
     def __init__(self, *args, **kwargs):
         kwargs.update({'final_file': 'http_headers'})
         super(HTTPHeadersGetter, self).__init__(*args, **kwargs)
@@ -147,6 +145,6 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
             self.tmp_file, filter(lambda x: x is not None, data_block)
         )
 
-    async def http_headers_getter(self):
+    async def run(self):
         await self.run_plugin(self._http_headers_handler, require_ports=True)
         self.output(self.tmp_file)

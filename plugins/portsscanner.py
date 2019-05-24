@@ -9,6 +9,6 @@ class PortsChecker(Output, TCPBase, AsyncPluginBase):
         kwargs.update({'final_file': 'ports_checker'})
         super(PortsChecker, self).__init__(*args, **kwargs)
 
-    async def scanner(self):
+    async def run(self):
         await self.run_plugin(self.find_open_ports, require_ports=True)
         self.output(self.tmp_file)
