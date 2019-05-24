@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import os
 import sys
 import argparse
 import asyncio
 import uvloop
+
+from datetime import datetime
 
 from extra.interface import *
 
@@ -20,9 +23,18 @@ default_ports = {
 }
 
 
+def get_formatted_plugin_start_msg():
+    date_now = datetime.now().strftime('%d-%m-%y %H-%M-%S')
+    return PLUGIN_START_MSG.format(date_now, 1, 2)
+
+
 def start_plugin(plugin, data):
     uvloop.install()
     hosts, ports = data.pop('hosts'), data.pop('ports')
+
+    os.system('clear')
+    print(get_formatted_plugin_start_msg())
+
     asyncio.run(plugin(hosts, ports, **data).run())
 
 
@@ -89,7 +101,7 @@ def ports_scanner_parser(parser):
 
 
 def cli():
-    args_checker()
+    # args_checker()
 
     parser = argparse.ArgumentParser(prog='pydrommer', description='SMTH DESC')
     subparsers = parser.add_subparsers(dest='plugins')
@@ -100,7 +112,9 @@ def cli():
     http_headers_getter = subparsers.add_parser(name='http_headers_getter')
     http_headers_getter_parser(http_headers_getter)
 
-    args = parser.parse_args()
+    args = parser.parse_args(
+        # ['http_headers_getter', '-iH', '46.160.199.52', '-iP', '0-65535', '--only-jsonrpc', 'True']
+    )
     call_specific_module(vars(args))
 
 

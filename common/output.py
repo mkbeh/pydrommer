@@ -48,10 +48,15 @@ class Output(IPSorter):
         self._output_writers = {
             'file': self._to_file,
         }
-        self._final_fh = open(
-            utils.get_file_path('pydrommer',
-                                f'{kwargs.get("final_file")}-final-{self._date_now}.prm'), 'a'
-        )
+
+        self._final_file = utils.get_file_path('pydrommer', f'{kwargs.get("final_file")}-final-{self._date_now}.prm')
+        self._final_fh = open(self._final_file, 'a')
+
+    def _get_final_msg(self):
+        msg = f'The output file is located by path -> {self._final_file}'
+        final_msg = '.' * len(msg) + '\n' + msg + '\n' + '.' * len(msg)
+
+        return final_msg
 
     def _to_file(self, data):
         self._final_fh.write(data)
@@ -59,7 +64,9 @@ class Output(IPSorter):
     def _final_actions(self):
         self.temp_fh.close()
         self._final_fh.close()
+
         utils.remove_file(self._tmp_file)
+        print(self._get_final_msg())
 
     @staticmethod
     def _get_ports_from_line(line):

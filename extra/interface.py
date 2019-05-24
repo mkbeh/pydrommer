@@ -48,3 +48,8 @@ OUTPUT_HELP = 'Where to record the result of the scan. By default in the file, '
               'which located by path -> ~/.local/share/pydrommer/'
 HOSTS_BLOCK_SIZE_HELP = 'The number of hosts that will be processed simultaneously.'
 PORTS_BLOCK_SIZE_HELP = 'The number of ports that will be processed simultaneously for each host.'
+
+PLUGIN_START_MSG = """
+>> Starting pydrommer 0.3.7 at {}
+>> Scanning {} hosts [{} ports/host]
+"""
