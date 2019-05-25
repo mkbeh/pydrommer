@@ -33,7 +33,7 @@ def range_to_int_nums(rng, check_valid=False):
 
 
 def sub_nums_in_seq(first, second):
-    return operator.sub(second, first)
+    return operator.sub(second, first) + 1
 
 
 def clear_string(s):

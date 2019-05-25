@@ -14,7 +14,7 @@ from extra import utils, exceptions
 
 
 @dataclass(repr=False, eq=False)
-class _ArgValueTypeDefiner:
+class ArgValueTypeDefiner:
     _hosts: str
     _ports: str
 
@@ -108,7 +108,7 @@ class _ArgValueTypeDefiner:
 
 
 @dataclass(repr=False, eq=False, init=False)
-class _BlocksCalculator(_ArgValueTypeDefiner):
+class _BlocksCalculator(ArgValueTypeDefiner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
         self._hosts_block_size = kwargs.get('hosts_block_size', 35)
