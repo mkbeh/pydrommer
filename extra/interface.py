@@ -1,6 +1,4 @@
-
-
-MODULES = """
+LOGO = """\u001b[35;1m
 -------------------------------------------------------------------------------------------------------
 :::::::::  :::   ::: :::::::::  :::::::::   ::::::::  ::::    ::::  ::::    ::::  :::::::::: :::::::::  
 :+:    :+: :+:   :+: :+:    :+: :+:    :+: :+:    :+: +:+:+: :+:+:+ +:+:+: :+:+:+ :+:        :+:    :+: 
@@ -10,6 +8,10 @@ MODULES = """
 #+#           #+#    #+#    #+# #+#    #+# #+#    #+# #+#       #+# #+#       #+# #+#        #+#    #+# 
 ###           ###    #########  ###    ###  ########  ###       ### ###       ### ########## ###    ### 
 -------------------------------------------------------------------------------------------------------
+"""
+
+MODULES = """
+{}\u001b[0m
 Pydrommer is an simple asynchronous Internet-scale port scanner that uses asyncio. It's flexible, 
 allowing arbitrary port, address ranges and other. There is also a module for receiving HTTP headers 
 and detection jsonrpc.
@@ -40,7 +42,7 @@ List of supported input:
   Ex.: pydrommer -iH ports_checker-final-24-05-19-21-34-03.prm -iP ports_checker-final-24-05-19-21-34-03.prm
 
   *prm extension in file is required!
-"""
+""".format(LOGO)
 
 CYCLE_TIMEOUT_HELP = 'Timeout between block cycles.'
 READ_TIMEOUT_HELP = 'Time to wait for a response from the server after sending the request.'
@@ -50,6 +52,7 @@ HOSTS_BLOCK_SIZE_HELP = 'The number of hosts that will be processed simultaneous
 PORTS_BLOCK_SIZE_HELP = 'The number of ports that will be processed simultaneously for each host.'
 
 PLUGIN_START_MSG = """
->> Starting pydrommer 0.3.7 at {}
->> Scanning {} hosts [{} ports/host]
+\u001b[31m>> \u001b[36mStarting pydrommer v0.3.7 at \u001b[33m{}
+\u001b[31m>> \u001b[36mScanning \u001b[33m{} \u001b[36mhosts \u001b[33m[{} \u001b[36mports/host\u001b[33m]
 """
+ELAPSED_TIME_MSG = '\u001b[31m>> \u001b[36mElapsed time: \u001b[33m{}'

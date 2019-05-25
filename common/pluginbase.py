@@ -5,12 +5,14 @@ import math
 import linecache
 import asyncio
 import itertools
+import shutil
 
 from dataclasses import dataclass, field
 
 from netaddr import IPNetwork
+from termcolor import colored
 
-from extra import utils, exceptions
+from extra import utils, exceptions, interface
 
 
 @dataclass(repr=False, eq=False)
@@ -318,6 +320,8 @@ class _DataPreparator(_BlocksCalculator):
 
 @dataclass(repr=False, eq=False, init=False)
 class AsyncPluginBase(_DataPreparator):
+    _term_columns = shutil.get_terminal_size().columns
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._data_type_spec = None
@@ -335,6 +339,24 @@ class AsyncPluginBase(_DataPreparator):
     def _is_data_type_spec(self):
         return True if self.data_types['hosts']['type'] == 'spec' else False
 
+    def _cli_verbose(self, hosts_block_num, ports_block_num):
+        percent_per_host_iter = 100 / self.num_blocks['hosts']
+        percent_per_port_iter = percent_per_host_iter / self.num_blocks['ports']
+
+        current_progress = hosts_block_num * percent_per_host_iter + ports_block_num * percent_per_port_iter
+        percent_progress = round(current_progress, 3)
+        progressbar_progress = round((self._term_columns - 25) / 100 * current_progress)
+
+        percent_output = f'[ {percent_progress}/100 (%) ]'
+        progressbar_output = f'[ {"=" * progressbar_progress}> {" " * (self._term_columns - 25 - progressbar_progress)}]'
+
+        os.system('clear')
+        print(interface.LOGO, end='')
+        print(interface.PLUGIN_START_MSG, end='')
+
+        if hosts_block_num != self.num_blocks['hosts'] and ports_block_num != self.num_blocks['ports']:
+            print(colored(progressbar_output, 'green') + colored(percent_output, 'yellow'))
+
     async def run_plugin(self, func, require_ports=False):
         self._data_type_spec = self._is_data_type_spec()
 
@@ -349,5 +371,6 @@ class AsyncPluginBase(_DataPreparator):
                     hosts_data_block, hosts_data_block_cp = itertools.tee(hosts_data_block)
                     ports_data_block = list(self.get_data_block(port_block_num + 1, data_belong_to='ports'))
                     await self._plugin_handler(func, hosts_data_block_cp, ports_data_block)
+                    self._cli_verbose(host_block_num, port_block_num + 1)
             else:
                 await self._plugin_handler(func, hosts_data_block)

@@ -53,10 +53,9 @@ class Output(IPSorter):
         self._final_fh = open(self._final_file, 'a')
 
     def _get_final_msg(self):
-        msg = f'The output file is located by path -> {self._final_file}'
-        final_msg = '.' * len(msg) + '\n' + msg + '\n' + '.' * len(msg)
+        msg = f'\u001b[31m>> \u001b[36mThe output file is located by path -> \u001b[33m{self._final_file}'
 
-        return final_msg
+        return msg
 
     def _to_file(self, data):
         self._final_fh.write(data)

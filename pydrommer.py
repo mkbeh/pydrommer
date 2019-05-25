@@ -10,9 +10,7 @@ import netaddr
 
 from datetime import datetime
 
-from extra.interface import *
-from extra import utils
-
+from extra import utils, interface
 from common.pluginbase import ArgValueTypeDefiner
 
 from plugins.httpheadersgetter import HTTPHeadersGetter
@@ -81,7 +79,7 @@ class DataCalculator(ArgValueTypeDefiner):
         return sum(calculated_data)
 
     @property
-    def calc_data(self):
+    def calculated_data(self):
         calculated_data = {}
 
         for name, val in self.get_data_types().items():
@@ -104,7 +102,10 @@ class Cli:
 
     def print_formatted_plugin_start_msg(self):
         date_now = datetime.now().strftime('%d-%m-%y %H-%M-%S')
-        print(PLUGIN_START_MSG.format(date_now, *self.data_calculator.calc_data))
+        interface.PLUGIN_START_MSG = interface.PLUGIN_START_MSG.format(date_now, *self.data_calculator.calculated_data)
+
+        print(interface.LOGO)
+        print(interface.PLUGIN_START_MSG)
 
     def start_plugin(self, plugin, data):
         hosts, ports = data.pop('hosts'), data.pop('ports')
@@ -114,7 +115,10 @@ class Cli:
         self.print_formatted_plugin_start_msg()
 
         uvloop.install()
+        start = datetime.now()
         asyncio.run(plugin(hosts, ports, **data).run())
+        end = datetime.now()
+        print(interface.ELAPSED_TIME_MSG.format(end - start))
 
     @staticmethod
     def rename_options(args):
@@ -152,7 +156,7 @@ class Cli:
         try:
             sys.argv[1]
         except IndexError:
-            print(MODULES)
+            print(interface.MODULES)
             sys.exit(0)
 
     @staticmethod
@@ -161,11 +165,11 @@ class Cli:
 
         parser.add_argument('-iH', required=True, help='Single host or from available input.')
         parser.add_argument('-iP', required=False, help='Single port or from available input.')
-        parser.add_argument('-cT', metavar='SECS', type=float, default=.1, help=CYCLE_TIMEOUT_HELP)
-        parser.add_argument('-rT', metavar='SECS', type=float, default=.1, help=READ_TIMEOUT_HELP)
-        parser.add_argument('-o', choices=output_to, default='file', help=OUTPUT_HELP)
-        parser.add_argument('-hS', metavar='NUM', type=int, default=35, help=HOSTS_BLOCK_SIZE_HELP)
-        parser.add_argument('-pS', metavar='NUM', type=int, default=20, help=PORTS_BLOCK_SIZE_HELP)
+        parser.add_argument('-cT', metavar='SECS', type=float, default=.1, help=interface.CYCLE_TIMEOUT_HELP)
+        parser.add_argument('-rT', metavar='SECS', type=float, default=.1, help=interface.READ_TIMEOUT_HELP)
+        parser.add_argument('-o', choices=output_to, default='file', help=interface.OUTPUT_HELP)
+        parser.add_argument('-hS', metavar='NUM', type=int, default=35, help=interface.HOSTS_BLOCK_SIZE_HELP)
+        parser.add_argument('-pS', metavar='NUM', type=int, default=20, help=interface.PORTS_BLOCK_SIZE_HELP)
 
     def http_headers_getter_parser(self, parser):
         self.parser_base_options(parser)
