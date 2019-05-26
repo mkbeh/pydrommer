@@ -48,8 +48,7 @@ List of supported input:
 
 CYCLE_TIMEOUT_HELP = 'Timeout between block cycles.'
 READ_TIMEOUT_HELP = 'Time to wait for a response from the server after sending the request.'
-OUTPUT_HELP = 'Where to record the result of the scan. By default in the file, ' \
-              'which located by path -> ~/.local/share/src/'
+OUTPUT_HELP = 'Where to record the result of the scan. By default to the file.'
 HOSTS_BLOCK_SIZE_HELP = 'The number of hosts that will be processed simultaneously.'
 PORTS_BLOCK_SIZE_HELP = 'The number of ports that will be processed simultaneously for each host.'
 
