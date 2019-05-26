@@ -36,10 +36,10 @@ List of supported input:
 ---------------------------------------------------------------------------------------------------------
   IMPORTANT NOTE:
   
-  In order to get HTTP headers or to detect a JSON-RPC for hosts from the final file that the pydrommer scanner 
+  In order to get HTTP headers or to detect a JSON-RPC for hosts from the final file that the src scanner 
   generates after scanning on open ports - use the following syntax:
 
-  Ex.: pydrommer -iH ports_checker-final-24-05-19-21-34-03.prm -iP ports_checker-final-24-05-19-21-34-03.prm
+  Ex.: src -iH ports_checker-final-24-05-19-21-34-03.prm -iP ports_checker-final-24-05-19-21-34-03.prm
   
   - In the example above the same file is specified.
   - *prm extension in file is required!
@@ -49,12 +49,12 @@ List of supported input:
 CYCLE_TIMEOUT_HELP = 'Timeout between block cycles.'
 READ_TIMEOUT_HELP = 'Time to wait for a response from the server after sending the request.'
 OUTPUT_HELP = 'Where to record the result of the scan. By default in the file, ' \
-              'which located by path -> ~/.local/share/pydrommer/'
+              'which located by path -> ~/.local/share/src/'
 HOSTS_BLOCK_SIZE_HELP = 'The number of hosts that will be processed simultaneously.'
 PORTS_BLOCK_SIZE_HELP = 'The number of ports that will be processed simultaneously for each host.'
 
 PLUGIN_START_MSG = """
-\u001b[31m>> \u001b[36mStarting pydrommer v0.3.7 at \u001b[33m{}
+\u001b[31m>> \u001b[36mStarting src v{} at \u001b[33m{}
 \u001b[31m>> \u001b[36mScanning \u001b[33m{} \u001b[36mhosts \u001b[33m[{} \u001b[36mports/host\u001b[33m]
 """
 ELAPSED_TIME_MSG = '\u001b[31m>> \u001b[36mElapsed time: \u001b[33m{}'

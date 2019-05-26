@@ -2,7 +2,7 @@
 import itertools
 
 from datetime import datetime
-from extra import utils
+from src.extra import utils
 
 
 class IPSorter:
@@ -49,7 +49,7 @@ class Output(IPSorter):
             'file': self._to_file,
         }
 
-        self._final_file = utils.get_file_path('pydrommer', f'{kwargs.get("final_file")}-final-{self._date_now}.prm')
+        self._final_file = utils.get_file_path('src', f'{kwargs.get("final_file")}-final-{self._date_now}.prm')
         self._final_fh = open(self._final_file, 'a')
 
     def _get_final_msg(self):

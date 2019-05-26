@@ -4,10 +4,10 @@ import time
 import asyncio
 import urllib.parse
 
-from common.pluginbase import AsyncPluginBase
-from common.output import Output
+from src.common.pluginbase import AsyncPluginBase
+from src.common.output import Output
 
-from extra import utils, decorators
+from src.extra import utils, decorators
 
 
 class HTTPHeadersGetter(Output, AsyncPluginBase):

@@ -2,7 +2,7 @@
 import time
 import asyncio
 
-from extra import utils, decorators
+from src.extra import utils, decorators
 
 
 SKIP_FIRST_ERR = False

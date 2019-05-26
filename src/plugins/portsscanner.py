@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from common.pluginbase import AsyncPluginBase
-from common.tcpbase import TCPBase
-from common.output import Output
+from src.common.pluginbase import AsyncPluginBase
+from src.common.tcpbase import TCPBase
+from src.common.output import Output
 
 
 class PortsChecker(Output, TCPBase, AsyncPluginBase):

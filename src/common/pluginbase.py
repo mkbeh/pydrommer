@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from netaddr import IPNetwork
 from termcolor import colored
 
-from extra import utils, exceptions, interface
+from src.extra import utils, exceptions, interface
 
 
 @dataclass(repr=False, eq=False)
@@ -63,7 +63,7 @@ class ArgValueTypeDefiner:
 
     @staticmethod
     def _is_service_file(val):
-        return True if val == 'pydrommer-services1.lst' else False
+        return True if val == 'src-services1.lst' else False
 
     @staticmethod
     def _is_file(val):

@@ -10,11 +10,12 @@ import netaddr
 
 from datetime import datetime
 
-from extra import utils, interface
-from common.pluginbase import ArgValueTypeDefiner
+from src import __version__
+from src.extra import utils, interface
+from src.common.pluginbase import ArgValueTypeDefiner
 
-from plugins.httpheadersgetter import HTTPHeadersGetter
-from plugins.portsscanner import PortsChecker
+from src.plugins.httpheadersgetter import HTTPHeadersGetter
+from src.plugins.portsscanner import PortsChecker
 
 
 class DataCalculator(ArgValueTypeDefiner):
@@ -96,13 +97,15 @@ class Cli:
         'http_headers_getter': HTTPHeadersGetter,
     }
     default_ports = {
-        'ports_scanner': '1-65535',
+        'ports_scanner': '1-1000',
         'http_headers_getter': '80',
     }
 
     def print_formatted_plugin_start_msg(self):
         date_now = datetime.now().strftime('%d-%m-%y %H-%M-%S')
-        interface.PLUGIN_START_MSG = interface.PLUGIN_START_MSG.format(date_now, *self.data_calculator.calculated_data)
+        interface.PLUGIN_START_MSG = interface.PLUGIN_START_MSG.format(
+            __version__, date_now, *self.data_calculator.calculated_data
+        )
 
         print(interface.LOGO)
         print(interface.PLUGIN_START_MSG)
@@ -182,7 +185,7 @@ class Cli:
     def cli(self):
         self.args_checker()
 
-        parser = argparse.ArgumentParser(prog='pydrommer', description='SMTH DESC')
+        parser = argparse.ArgumentParser(prog='src', description='SMTH DESC')
         subparsers = parser.add_subparsers(dest='plugins')
 
         ports_scanner = subparsers.add_parser(name='ports_scanner')
@@ -195,5 +198,9 @@ class Cli:
         self.call_specific_module(vars(args))
 
 
-if __name__ == '__main__':
+def main():
     Cli().cli()
+
+
+if __name__ == '__main__':
+    main()
