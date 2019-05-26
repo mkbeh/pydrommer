@@ -64,6 +64,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
         )
 
         writer.write(query.encode('utf-8'))
+        await writer.drain()
 
     @staticmethod
     async def _get_valid_port(port, url_scheme):
