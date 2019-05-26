@@ -5,6 +5,9 @@ import asyncio
 from extra import utils, decorators
 
 
+SKIP_FIRST_ERR = False
+
+
 class TCPBase:
     def __init__(self, *args, **kwargs):
         super(TCPBase, self).__init__(*args, **kwargs)
@@ -12,6 +15,20 @@ class TCPBase:
         self._read_timeout = kwargs.get('read_timeout', .1)
 
         self.tmp_file = utils.create_tmp_file(prefix='pydrommer_')
+
+    @staticmethod
+    def filter_data(el):
+        global SKIP_FIRST_ERR
+
+        if not isinstance(el, str):
+            return False
+
+        if 'ConnectionRefusedError' in el and SKIP_FIRST_ERR is False:
+            SKIP_FIRST_ERR = True
+            return True
+
+        if 'ConnectionRefusedError' not in el:
+            return True
 
     @staticmethod
     async def close_conn(sock):
@@ -38,5 +55,8 @@ class TCPBase:
         )
 
         await decorators.async_write_to_file(
-            self.tmp_file, filter(lambda x: isinstance(x, str), open_ports)
+            self.tmp_file, filter(self.filter_data, open_ports)
         )
+
+        global SKIP_FIRST_ERR
+        SKIP_FIRST_ERR = False

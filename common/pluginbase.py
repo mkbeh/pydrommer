@@ -157,7 +157,7 @@ class _BlocksCalculator(ArgValueTypeDefiner):
 
         if valid_range:
             range_len = utils.sub_nums_in_seq(*nums)
-            return self._calc_blocks(name, range_len + 1)
+            return self._calc_blocks(name, range_len)
 
         raise exceptions.InvalidPortsRange(val)
 
@@ -326,6 +326,24 @@ class AsyncPluginBase(_DataPreparator):
         super().__init__(*args, **kwargs)
         self._data_type_spec = None
 
+    def _cli_verbose(self, hosts_block_num, ports_block_num):
+        percent_per_host_iter = 100 / self.num_blocks['hosts']
+        percent_per_port_iter = percent_per_host_iter / self.num_blocks['ports']
+
+        current_progress = hosts_block_num * percent_per_host_iter + ports_block_num * percent_per_port_iter
+        percent_progress = round(current_progress, 3)
+        progressbar_progress = round((self._term_columns - 25) / 100 * current_progress)
+
+        percent_out = f'[ {percent_progress}/100 (%) ]'
+        progressbar_out = f'[ {"=" * progressbar_progress}> {" " * (self._term_columns - 25 - progressbar_progress)}]'
+
+        os.system('clear')
+        print(interface.LOGO, end='')
+        print(interface.PLUGIN_START_MSG, end='')
+
+        if hosts_block_num != self.num_blocks['hosts'] and ports_block_num != self.num_blocks['ports']:
+            print(colored(progressbar_out, 'green') + colored(percent_out, 'yellow'))
+
     async def _plugin_handler(self, func, hosts_block, ports_block=None):
         if ports_block:
             genexpr = (func(host, ports_block) for host in hosts_block)
@@ -338,24 +356,6 @@ class AsyncPluginBase(_DataPreparator):
 
     def _is_data_type_spec(self):
         return True if self.data_types['hosts']['type'] == 'spec' else False
-
-    def _cli_verbose(self, hosts_block_num, ports_block_num):
-        percent_per_host_iter = 100 / self.num_blocks['hosts']
-        percent_per_port_iter = percent_per_host_iter / self.num_blocks['ports']
-
-        current_progress = hosts_block_num * percent_per_host_iter + ports_block_num * percent_per_port_iter
-        percent_progress = round(current_progress, 3)
-        progressbar_progress = round((self._term_columns - 25) / 100 * current_progress)
-
-        percent_output = f'[ {percent_progress}/100 (%) ]'
-        progressbar_output = f'[ {"=" * progressbar_progress}> {" " * (self._term_columns - 25 - progressbar_progress)}]'
-
-        os.system('clear')
-        print(interface.LOGO, end='')
-        print(interface.PLUGIN_START_MSG, end='')
-
-        if hosts_block_num != self.num_blocks['hosts'] and ports_block_num != self.num_blocks['ports']:
-            print(colored(progressbar_output, 'green') + colored(percent_output, 'yellow'))
 
     async def run_plugin(self, func, require_ports=False):
         self._data_type_spec = self._is_data_type_spec()

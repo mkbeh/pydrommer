@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 import operator
 import itertools
 import tempfile
 
 
-def count_lines(filename, chunk_size=1 << 13):
+def is_template_in_str(s, template=r'\w+'):
+    pattern = re.compile(template)
+    return True if re.search(pattern, s) else False
+
+
+def count_lines(filename):
     with open(filename) as file:
-        return sum(chunk.count('\n')
-                   for chunk in iter(lambda: file.read(chunk_size), ''))
+        return sum(is_template_in_str(line) for line in file)
 
 
 def truncate(num, decimals=0):
