@@ -1,9 +1,10 @@
 # PYDROMMER: Mass IP port scanner
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
+![Platform](https://img.shields.io/badge/platform-linux-green.svg)
 
 Pydrommer is an simple asynchronous Internet-scale port scanner that uses asyncio. It's flexible, 
 allowing arbitrary port, address ranges and other. There is also a module for receiving HTTP headers 
-and detection jsonrpc7
+and detection jsonrpc.
 
 ##### Currently it supports the following modules:
   + ports_scanner           : Discovers open ports
