@@ -6,7 +6,7 @@ Pydrommer is an simple asynchronous Internet-scale port scanner that uses asynci
 allowing arbitrary port, address ranges and other. There is also a module for receiving HTTP headers 
 and detection jsonrpc.
 
-##### Currently it supports the following modules:
+#### Currently it supports the following modules:
   + **ports_scanner**           : Discovers open ports
   + **http_headers_getter**     : Gets HTTP headers or only discovers JSON RPC
 
