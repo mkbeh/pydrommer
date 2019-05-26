@@ -53,7 +53,7 @@ HOSTS_BLOCK_SIZE_HELP = 'The number of hosts that will be processed simultaneous
 PORTS_BLOCK_SIZE_HELP = 'The number of ports that will be processed simultaneously for each host.'
 
 PLUGIN_START_MSG = """
-\u001b[31m>> \u001b[36mStarting src v{} at \u001b[33m{}
+\u001b[31m>> \u001b[36mStarting pydrommer v{} at \u001b[33m{}
 \u001b[31m>> \u001b[36mScanning \u001b[33m{} \u001b[36mhosts \u001b[33m[{} \u001b[36mports/host\u001b[33m]
 """
 ELAPSED_TIME_MSG = '\u001b[31m>> \u001b[36mElapsed time: \u001b[33m{}'
