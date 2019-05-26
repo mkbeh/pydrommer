@@ -7,8 +7,8 @@ allowing arbitrary port, address ranges and other. There is also a module for re
 and detection jsonrpc.
 
 ##### Currently it supports the following modules:
-  + ports_scanner           : Discovers open ports
-  + http_headers_getter     : Gets HTTP headers or only discovers JSON RPC
+  + **ports_scanner**           : Discovers open ports
+  + **http_headers_getter**     : Gets HTTP headers or only discovers JSON RPC
 
 **The following actions were performed on ubuntu 19.04 with
 python3.7**
