@@ -54,7 +54,7 @@ List of supported input:
 pydrommer  
 
 # Will show help message for module          
-pydrommer <module_name>
+pydrommer <module_name> --help
 
 # Will scan current IP by range.        
 pydrommer ports_scanner -iH 192.0.2.1 -iP 1-65535
