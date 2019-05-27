@@ -177,7 +177,7 @@ class Cli:
     def http_headers_getter_parser(self, parser):
         self.parser_base_options(parser)
         parser.add_argument('--only-jsonrpc', required=False, type=bool, default=False,
-                            help='Will discover only JSON RPC.')
+                            metavar='BOOL', help='Will discover only JSON RPC.')
 
     def ports_scanner_parser(self, parser):
         self.parser_base_options(parser)

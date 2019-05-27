@@ -27,7 +27,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
             for header in headers:
                 node += f'<{header}>'
 
-            return node
+            return f'{node}\n'
 
         return
 
@@ -132,7 +132,7 @@ class HTTPHeadersGetter(Output, AsyncPluginBase):
             jsonrpc_header = await self._check_on_jsonrpc(headers)
 
             if jsonrpc_header:
-                return f'{valid_url}:{port}-{jsonrpc_header}'
+                return f'{valid_url}:{port}-<{jsonrpc_header}>\n'
 
         return await self._prepare_final_data(headers, valid_url, port)
 
