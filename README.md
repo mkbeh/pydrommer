@@ -39,10 +39,10 @@ List of supported input:
 ---------------------------------------------------------------------------------------------------------
   IMPORTANT NOTE:
   
-  In order to get HTTP headers or to detect a JSON-RPC for hosts from the final file that the src scanner 
+  In order to get HTTP headers or to detect a JSON-RPC for hosts from the final file that the pydrommer scanner 
   generates after scanning on open ports - use the following syntax:
 
-  Ex.: src -iH ports_checker-final-24-05-19-21-34-03.prm -iP ports_checker-final-24-05-19-21-34-03.prm
+  Ex.: pydrommer ports_scanner -iH ports_checker-final-24-05-19-21-34-03.prm -iP ports_checker-final-24-05-19-21-34-03.prm
   
   - In the example above the same file is specified.
   - *prm extension in file is required!
