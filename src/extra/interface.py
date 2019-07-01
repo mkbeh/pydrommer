@@ -36,6 +36,8 @@ List of supported input:
 ---------------------------------------------------------------------------------------------------------
   IMPORTANT NOTE:
   
+  For more accurate results, manipulate the options `hS` and `pS`.
+  
   In order to get HTTP headers or to detect a JSON-RPC for hosts from the final file that the src scanner 
   generates after scanning on open ports - use the following syntax:
 

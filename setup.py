@@ -7,7 +7,7 @@ setup(
     version=__version__,
     description='Simple asynchronous Internet-scale port scanner.',
     author='mkbeh',
-    license='GPLv3',
+    license='MIT',
     platforms='linux',
     install_requires=[
         'uvloop==0.12.2',

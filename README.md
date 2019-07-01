@@ -10,6 +10,14 @@ and detection jsonrpc.
   + **ports_scanner**           : Discovers open ports
   + **http_headers_getter**     : Gets HTTP headers or only discovers JSON RPC
 
+
+**Donate me if you like it:**
+```
+bitcoin -> bc1qqkr72aemz59aawxf74gytrwuw4m9mj20t7e7df
+ethereum -> 0xB3e5b643cFB9e2565a3456eC7c7A73491A32e31F
+```
+
+
 **The following actions were performed on ubuntu 19.04 with
 python3.7**
 
@@ -17,8 +25,11 @@ python3.7**
 ```bash
 git clone https://github.com/mkbeh/pydrommer
 cd pydrommer
-python3.7 setup.py install
+python3.7 setup.py install --user
 pydrommer
+
+Note:
+If error previously add clonned directory to PYTHONPATH. 
 ```
 
 ## Usage
@@ -38,6 +49,8 @@ List of supported input:
     * single port
 ---------------------------------------------------------------------------------------------------------
   IMPORTANT NOTE:
+  
+  For more accurate results, manipulate the options `hS` and `pS`.
   
   In order to get HTTP headers or to detect a JSON-RPC for hosts from the final file that the pydrommer scanner 
   generates after scanning on open ports - use the following syntax:
